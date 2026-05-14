@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
         logger.info("Connection pool limpo")
 
 app = FastAPI(
-    title="CaseBem - Lista de Casamento",
+    title="VouCasar - Lista de Casamento",
     description="API para gerenciamento de lista de casamento",
     version="1.0.0",
     docs_url="/docs",
@@ -87,8 +87,8 @@ async def catch_exceptions_middleware(request: Request, call_next):
             content={"erro": "Erro interno do servidor. Tente novamente mais tarde."},
         )
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'casebem-secret-key-change-in-production')
-if IS_PRODUCTION and SECRET_KEY == 'casebem-secret-key-change-in-production':
+SECRET_KEY = os.getenv('SECRET_KEY', 'voucasar-secret-key-change-in-production')
+if IS_PRODUCTION and SECRET_KEY == 'voucasar-secret-key-change-in-production':
     raise ValueError("SECRET_KEY deve ser alterada em produção")
 
 app.add_middleware(
@@ -97,7 +97,7 @@ app.add_middleware(
     max_age=2592000,
     same_site="lax",
     https_only=IS_PRODUCTION,
-    session_cookie="casebem_session"
+    session_cookie="voucasar_session"
 )
 
 allowed_origins = [FRONTEND_URL]
@@ -116,7 +116,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Importando routers de CaseBem
+# Importando routers de VouCasar
 from backend.routers.usuario import router as usuario_router
 from backend.routers.casal import router as casal_router
 from backend.routers.presente import router as presente_router
@@ -132,7 +132,7 @@ app.include_router(transacao_presente_router)
 
 @app.get("/")
 async def root():
-    return {"mensagem": "CaseBem - API de Lista de Casamento", "versao": "1.0.0"}
+    return {"mensagem": "VouCasar - API de Lista de Casamento", "versao": "1.0.0"}
 
 @app.get("/health")
 async def health():

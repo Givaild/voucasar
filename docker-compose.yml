@@ -2,7 +2,7 @@ services:
   # Banco de dados MySQL
   mysql:
     image: mysql:8.0
-    container_name: casebem-mysql
+    container_name: voucasar-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -11,12 +11,12 @@ services:
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_unicode_ci
     volumes:
-      - casebem-mysql-data:/var/lib/mysql
+      - voucasar-mysql-data:/var/lib/mysql
       - ./backups:/backups
     ports:
       - "127.0.0.1:3306:3306" # Apenas localhost
     networks:
-      - casebem-network
+      - voucasar-network
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root" ]
@@ -30,7 +30,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: casebem-backend
+    container_name: voucasar-backend
     env_file:
       - .env
     ports:
@@ -39,7 +39,7 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - casebem-network
+      - voucasar-network
     restart: unless-stopped
     command: uvicorn main:app --host 0.0.0.0 --port 8000
 
@@ -48,15 +48,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: casebem-frontend
+    container_name: voucasar-frontend
     environment:
-      NEXT_PUBLIC_API_URL: https://www.casebem.cauamarvila.com.br/
+      NEXT_PUBLIC_API_URL: https://www.voucasar.cauamarvila.com.br/
     ports:
       - "3000:3000"
     depends_on:
       - backend
     networks:
-      - casebem-network
+      - voucasar-network
     restart: unless-stopped
 
 volumes:

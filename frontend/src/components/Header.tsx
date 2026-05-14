@@ -19,7 +19,7 @@ export const Header: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <Link to="/" className="flex items-center">
-                        <span className="text-2xl font-bold text-primary-600">💍 CaseBem</span>
+                        <span className="text-2xl font-bold text-primary-600">💍 VouCasar</span>
                     </Link>
 
                     {usuario && (

@@ -1,11 +1,11 @@
-# 💍 CaseBem - Lista de Casamento
+# 💍 VouCasar - Lista de Casamento
 
 Um sistema completo para gerenciamento de lista de casamento com frontend React e backend FastAPI.
 
 ## 📋 Estrutura do Projeto
 
 ```
-casebem/
+voucasar/
 ├── frontend/                      # React + React Router + Tailwind
 │   ├── src/
 │   │   ├── App.tsx               # Componente principal com rotas
@@ -190,7 +190,7 @@ FRONTEND_URL=http://localhost:5173
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=sua_senha
-DB_NAME=casebem
+DB_NAME=voucasar
 
 # Segurança
 SECRET_KEY=sua-chave-secreta-aqui
@@ -231,8 +231,8 @@ Este projeto está licenciado sob a licença MIT.
 
 ## 👥 Suporte
 
-Para suporte, envie um email para suporte@casebem.com ou abra uma issue no repositório.
+Para suporte, envie um email para suporte@voucasar.com ou abra uma issue no repositório.
 
 ---
 
-**Desenvolvido com ❤️ por CaseBem**
+**Desenvolvido com ❤️ por VouCasar**

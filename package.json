@@ -1,5 +1,5 @@
 {
-    "name": "casebem",
+    "name": "voucasar",
     "version": "1.0.0",
     "description": "Sistema de lista de casamento com React e FastAPI",
     "scripts": {
@@ -19,7 +19,7 @@
         "react",
         "fastapi"
     ],
-    "author": "CaseBem",
+    "author": "VouCasar",
     "license": "MIT",
     "devDependencies": {
         "concurrently": "^8.2.1"

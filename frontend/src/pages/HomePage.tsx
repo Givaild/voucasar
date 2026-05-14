@@ -10,7 +10,7 @@ export const HomePage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-screen flex flex-col items-center justify-center">
                 <div className="text-center">
                     <Heart className="inline-block text-primary-600 mb-4 animate-bounce" size={64} />
-                    <h1 className="text-5xl font-bold text-gray-900 mb-4">💍 CaseBem</h1>
+                    <h1 className="text-5xl font-bold text-gray-900 mb-4">💍 VouCasar</h1>
                     <p className="text-xl text-gray-700 mb-2">Organize sua lista de casamento com facilidade</p>
                     <p className="text-lg text-gray-600 mb-8">Gerencie presentes, preços e convidados em um único lugar</p>
 
