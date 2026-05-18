@@ -236,13 +236,17 @@ export const DashboardPage: React.FC = () => {
                     </div>
 
                     {/* Ações Rápidas */}
-                    <div className="lg:col-span-4 space-y-4">
+                    <div className="lg:col-span-4 flex flex-col gap-4">
                         <button
-                            onClick={() => casais[0] && navigate(`/casais/${casais[0].id}/template`)}
-                            className="w-full flex items-center justify-between p-6 bg-white rounded-3xl border border-primary-100 hover:border-primary-200 hover:shadow-lg transition-all group"
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (casais[0]) navigate(`/casais/${casais[0].id}/template`);
+                            }}
+                            className="w-full h-full min-h-[100px] flex items-center justify-between p-6 bg-white rounded-3xl border border-primary-100 active:bg-primary-50 active:scale-[0.98] lg:hover:border-primary-200 lg:hover:shadow-lg transition-all group cursor-pointer"
                         >
-                            <div className="flex items-center gap-4 text-left">
-                                <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 group-hover:scale-110 transition-transform">
+                            <div className="flex items-center gap-4 text-left pointer-events-none">
+                                <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 transition-transform">
                                     <Edit2 size={24} />
                                 </div>
                                 <div>
@@ -253,11 +257,15 @@ export const DashboardPage: React.FC = () => {
                         </button>
 
                         <button
-                            onClick={() => casais[0] && navigate(`/casais/${casais[0].id}/presentes`)}
-                            className="w-full flex items-center justify-between p-6 bg-white rounded-3xl border border-primary-100 hover:border-primary-200 hover:shadow-lg transition-all group"
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (casais[0]) navigate(`/casais/${casais[0].id}/presentes`);
+                            }}
+                            className="w-full h-full min-h-[100px] flex items-center justify-between p-6 bg-white rounded-3xl border border-primary-100 active:bg-primary-50 active:scale-[0.98] lg:hover:border-primary-200 lg:hover:shadow-lg transition-all group cursor-pointer"
                         >
-                            <div className="flex items-center gap-4 text-left">
-                                <div className="p-3 bg-red-50 rounded-2xl text-red-500 group-hover:scale-110 transition-transform">
+                            <div className="flex items-center gap-4 text-left pointer-events-none">
+                                <div className="p-3 bg-red-50 rounded-2xl text-red-500 transition-transform">
                                     <Plus size={24} />
                                 </div>
                                 <div>
@@ -320,12 +328,6 @@ export const DashboardPage: React.FC = () => {
                                 <p className="text-primary-800/80 text-sm leading-relaxed mb-6">
                                     Adicione pelo menos 5 presentes de diferentes faixas de preço para dar opções aos seus convidados. Presentes via PIX caem direto na sua conta!
                                 </p>
-                            </div>
-                            <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 flex items-center gap-4 border border-primary-200/30">
-                                <div className="w-10 h-10 rounded-full bg-primary-200/50 text-primary-700 flex items-center justify-center">
-                                    <Share2 size={18} />
-                                </div>
-                                <p className="text-xs font-semibold text-primary-800">Link do site ativo: <span className="underline opacity-80 decoration-1">voucasar.com/{template?.slug || casal.id}</span></p>
                             </div>
                         </div>
                     </div>
