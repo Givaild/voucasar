@@ -27,17 +27,33 @@ export const ListaPresentes: React.FC = () => {
     const carregarDados = async () => {
         try {
             setLoading(true);
-            const templateData = await templateAPI.buscarPublicoPorSlug(casalId!);
-            const correctCasalId = templateData.id_casal;
+            setError('');
+
+            let actualId: number;
+
+            // Tenta tratar casalId como slug primeiro
+            try {
+                const templateData = await templateAPI.buscarPublicoPorSlug(casalId!);
+                actualId = templateData.id_casal;
+            } catch (slugErr) {
+                // Se falhar por slug, assume que é ID numérico
+                if (!isNaN(Number(casalId))) {
+                    actualId = Number(casalId);
+                } else {
+                    throw new Error('Identificador de casal inválido');
+                }
+            }
+
             const [presentesData, casalData] = await Promise.all([
-                presenteAPI.listarPorCasal(correctCasalId),
-                casalAPI.buscarPublico(correctCasalId),
+                presenteAPI.listarPorCasal(actualId),
+                casalAPI.buscarPublico(actualId),
             ]);
+
             setPresentes(presentesData);
             setCasal(casalData);
         } catch (err: any) {
             setError('Erro ao carregar presentes');
-            console.error(err);
+            console.error('Erro detalhado:', err);
         } finally {
             setLoading(false);
         }
