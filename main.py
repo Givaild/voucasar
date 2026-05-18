@@ -9,6 +9,7 @@ import logging
 import os
 import uuid
 from dotenv import load_dotenv
+from init_db import init_database
 
 load_dotenv()
 
@@ -25,6 +26,11 @@ async def lifespan(app: FastAPI):
     pool = get_pool()
     if pool:
         logger.info("Connection pool inicializado com sucesso!")
+        try:
+            init_database()
+            logger.info("Tabelas inicializadas com sucesso!")
+        except Exception as e:
+            logger.error(f"Falha ao inicializar tabelas: {e}")
     else:
         logger.error("Falha ao inicializar connection pool")
     
