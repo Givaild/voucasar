@@ -630,6 +630,14 @@ export const ListaPresentes: React.FC = () => {
                                         </div>
                                     </div>
 
+                                    {/* Mensagem de Verificação do Nome (Sempre importante) */}
+                                    <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-100 rounded-2xl mb-6 text-left">
+                                        <AlertCircle className="text-amber-600 flex-shrink-0" size={20} />
+                                        <p className="text-xs text-amber-800 leading-relaxed">
+                                            <strong>Importante:</strong> Ao realizar o pagamento no seu banco, verifique se o nome do destinatário corresponde ao <strong>casal</strong> ou à pessoa cadastrada como responsável pela chave PIX.
+                                        </p>
+                                    </div>
+
                                     <button
                                         onClick={() => {
                                             setSelectedPresente(null);
@@ -637,9 +645,9 @@ export const ListaPresentes: React.FC = () => {
                                             setGuestInfo({ nome: '', email: '' });
                                             carregarDados(); // Atualiza a lista instantaneamente!
                                         }}
-                                        className="btn btn-primary w-full"
+                                        className="btn btn-primary w-full shadow-lg shadow-primary-100"
                                     >
-                                        Concluído
+                                        Já realizei o pagamento
                                     </button>
                                 </div>
                             )

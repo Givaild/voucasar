@@ -138,281 +138,236 @@ export const DashboardPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-transparent">
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 bg-white/40 backdrop-blur-sm p-6 rounded-2xl border border-primary-100 shadow-sm animate-fade-in">
-                    <div className="flex items-center gap-5">
-                        {template && (template.foto_casal_horizontal || template.foto_casal_vertical) ? (
-                            <img
-                                src={template.foto_casal_horizontal || template.foto_casal_vertical}
-                                alt="Foto do Casal"
-                                className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-full border-2 border-primary-200 shadow-md flex-shrink-0"
-                                onError={(e) => {
-                                    (e.target as HTMLElement).style.display = 'none';
-                                }}
-                            />
-                        ) : (
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                <Heart className="text-[#a89073] animate-pulse" size={32} />
-                            </div>
-                        )}
-                        <div>
-                            <h2 className="text-xs font-caps tracking-[0.3em] text-[#a89073] uppercase mb-1">
-                                Painel do Casal
-                            </h2>
-                            <h1 className="text-3xl md:text-4xl font-serif font-semibold text-gray-900 leading-tight">
-                                {template?.nomes_noivos || usuario?.nome || 'Usuário'}
-                            </h1>
-                            {casais[0] && (
-                                <p className="text-xs text-gray-500 font-medium mt-1">
-                                    Casamento em: {new Date(casais[0].data_casamento).toLocaleDateString('pt-BR')}
-                                </p>
+        <div className="min-h-screen bg-[#fdfbf7]">
+            {/* Cabeçalho do Dashboard - Responsivo */}
+            <div className="bg-white/40 backdrop-blur-md border-b border-primary-100 shadow-sm sticky top-0 z-40">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            {template && (template.foto_casal_horizontal || template.foto_casal_vertical) ? (
+                                <img
+                                    src={template.foto_casal_horizontal || template.foto_casal_vertical}
+                                    alt="Foto"
+                                    className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-full border-2 border-primary-100 flex-shrink-0"
+                                />
+                            ) : (
+                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
+                                    <Heart className="text-[#a89073]" size={20} />
+                                </div>
                             )}
+                            <div>
+                                <h1 className="text-xl md:text-2xl font-serif font-bold text-gray-900 truncate max-w-[200px] md:max-w-none">
+                                    {template?.nomes_noivos || usuario?.nome || 'Seu Painel'}
+                                </h1>
+                                <p className="text-[10px] md:text-xs text-[#a89073] font-bold tracking-[0.1em] uppercase">Painel do Casal</p>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                {error && (
-                    <div className="alert alert-error mb-6">
-                        <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-                        <p className="text-red-700 text-sm">{error}</p>
-                    </div>
-                )}
-
-                {/* Stats Cards / Countdown */}
-                <div className="grid grid-cols-1 gap-6 mb-12">
-                    <div className="card text-center overflow-hidden relative">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-200 via-primary-500 to-primary-200"></div>
-                        <h3 className="text-sm font-caps tracking-[0.2em] text-[#a89073] uppercase mb-8 mt-2">
-                            Falta Para o Grande Dia
-                        </h3>
-
-                        <div className="flex justify-center gap-4 md:gap-8">
-                            {[
-                                { label: 'Dias', value: countdown.dias },
-                                { label: 'Horas', value: countdown.horas },
-                                { label: 'Minutos', value: countdown.minutos },
-                                { label: 'Segundos', value: countdown.segundos },
-                            ].map((item, idx) => (
-                                <React.Fragment key={idx}>
-                                    <div className="flex flex-col items-center">
-                                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-primary-100 shadow-sm min-w-[70px] md:min-w-[90px]">
-                                            <span className="text-2xl md:text-4xl font-serif text-[#1e293b] leading-none block mb-1">
-                                                {String(item.value).padStart(2, '0')}
-                                            </span>
-                                            <span className="text-[9px] md:text-xs font-caps tracking-widest text-[#a89073] uppercase">
-                                                {item.label}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {idx < 3 && (
-                                        <div className="flex items-center text-[#ecdcb9] text-2xl md:text-4xl font-light">
-                                            :
-                                        </div>
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Casal Card ou Formulário Inicial */}
-                {casais.length === 0 ? (
-                    <div className="card max-w-2xl mx-auto border-primary-200">
-                        <div className="text-center mb-8">
-                            <Heart className="mx-auto text-primary-300 mb-4" size={48} />
-                            <h3 className="text-2xl font-serif font-semibold text-gray-900">
-                                Configure Seu Casamento
-                            </h3>
-                            <p className="text-gray-600 mt-2">
-                                Preencha as informações básicas para começar
-                            </p>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div>
-                                <label className="label">Email do Parceiro(a)</label>
-                                <input
-                                    type="email"
-                                    value={formData.emailNoivo}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            emailNoivo: e.target.value,
-                                        })
-                                    }
-                                    className="input-field"
-                                    placeholder="email@exemplo.com"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="label">Data do Casamento</label>
-                                <input
-                                    type="date"
-                                    value={formData.dataCasamento}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            dataCasamento: e.target.value,
-                                        })
-                                    }
-                                    className="input-field"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="label">Chave PIX para Presentes</label>
-                                <input
-                                    type="text"
-                                    value={formData.chavePix}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            chavePix: e.target.value,
-                                        })
-                                    }
-                                    className="input-field"
-                                    placeholder="CPF, Email, Telefone ou Chave Aleatória"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary w-full mt-4 py-4 text-lg"
-                                disabled={loading}
-                            >
-                                {loading ? 'Salvando...' : 'Criar Meu Casamento'}
-                            </button>
-                        </form>
-                    </div>
-                ) : (
-                    <div className="card hover:shadow-lg transition">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                    Meu Casamento
-                                </h3>
-                                <p className="text-gray-600">
-                                    {formatarData(casais[0].data_casamento)}
-                                </p>
-                                <p className="text-sm text-primary-600 mt-2">
-                                    ⏱ {diasParaCasamento(casais[0].data_casamento)} dias restantes
-                                </p>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => navigate(`/casais/${casais[0].id}/presentes`)}
-                                    className="btn btn-primary px-6"
-                                >
-                                    Ver Presentes
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setNewPixKey(casais[0].chave_pix);
-                                        setShowPixModal(true);
-                                    }}
-                                    className="btn btn-secondary p-3"
-                                    title="Alterar Chave PIX"
-                                >
-                                    <CreditCard size={18} />
-                                </button>
-                                <button
-                                    onClick={() => navigate(`/casais/${casais[0].id}/template`)}
-                                    className="btn btn-secondary p-3"
-                                    title="Editar Página do Casamento"
-                                >
-                                    <Edit2 size={18} />
-                                </button>
+                        <div className="flex items-center gap-2 overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
+                            {casais[0] && (
                                 <button
                                     onClick={() => handleCopyLink(casais[0].id)}
-                                    className="btn btn-secondary p-3"
-                                    title="Gerar Link para Convidados"
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${copiedId ? 'bg-green-100 text-green-700' : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
+                                        }`}
                                 >
-                                    {copiedId === casais[0].id ? <CheckCircle2 size={18} className="text-green-600" /> : <Share2 size={18} />}
+                                    {copiedId ? <CheckCircle2 size={14} /> : <Share2 size={14} />}
+                                    {copiedId ? 'Link Copiado!' : 'Copiar Link'}
                                 </button>
-                                <button
-                                    onClick={() => {
-                                        const slug = template?.slug || (template?.nomes_noivos ? template.nomes_noivos
-                                            .normalize('NFD')
-                                            .replace(/[\u0300-\u036f]/g, '')
-                                            .toLowerCase()
-                                            .replace(/[^a-z0-9\-]/g, '-')
-                                            .replace(/-+/g, '-')
-                                            .replace(/^-+|-+$/g, '') : String(casais[0].id));
-                                        window.open(`/casamento/${slug}`, '_blank');
-                                    }}
-                                    className="btn btn-secondary p-3"
-                                    title="Visualizar Página Pública"
-                                >
-                                    <Eye size={18} />
-                                </button>
+                            )}
+                            <button
+                                onClick={() => navigate(`/casamento/${template?.slug || casais[0]?.id}`)}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 hover:border-primary-200 text-gray-700 rounded-xl text-xs font-bold transition-all whitespace-nowrap shadow-sm"
+                            >
+                                <Eye size={14} /> Ver Site
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            {/* Conteúdo Principal */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+                {error && (
+                    <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 text-red-700 mb-8 border border-red-100 animate-fade-in">
+                        <AlertCircle className="flex-shrink-0 mt-0.5" size={18} />
+                        <p className="text-sm font-medium">{error}</p>
+                    </div>
+                )}
+
+                {/* Stats / Countdown - Melhorado para Mobile */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
+                    <div className="lg:col-span-8">
+                        <div className="bg-white/70 backdrop-blur-xl rounded-[2rem] p-6 md:p-10 border border-white shadow-xl shadow-primary-500/5 h-full flex flex-col justify-center text-center">
+                            <h3 className="text-[10px] font-bold tracking-[0.3em] text-[#a89073] uppercase mb-8">
+                                O Grande Dia está Chegando
+                            </h3>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                                {[
+                                    { label: 'Dias', value: countdown.dias },
+                                    { label: 'Horas', value: countdown.horas },
+                                    { label: 'Minutos', value: countdown.minutos },
+                                    { label: 'Segundos', value: countdown.segundos },
+                                ].map((item, idx) => (
+                                    <div key={idx} className="bg-white rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm transition-transform hover:scale-[1.02]">
+                                        <span className="text-3xl md:text-5xl font-serif text-[#1e293b] leading-none block mb-2">
+                                            {String(item.value).padStart(2, '0')}
+                                        </span>
+                                        <span className="text-[9px] md:text-[11px] font-bold tracking-[0.1em] text-[#d6aa65] uppercase">
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
 
-            {/* Modal Alterar PIX */}
-            {showPixModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#fcf8f1] rounded-2xl shadow-2xl max-w-md w-full p-8 border border-white">
-                        <h3 className="text-2xl font-serif font-semibold text-gray-900 mb-6">
-                            Alterar Chave PIX
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-6">
-                            Esta chave será usada para gerar os QR Codes de presente dos seus convidados.
+                    {/* Ações Rápidas */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <button
+                            onClick={() => casais[0] && navigate(`/casais/${casais[0].id}/template`)}
+                            className="w-full flex items-center justify-between p-6 bg-white rounded-3xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all group"
+                        >
+                            <div className="flex items-center gap-4 text-left">
+                                <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 group-hover:scale-110 transition-transform">
+                                    <Edit2 size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-gray-900">Editar Site</h4>
+                                    <p className="text-xs text-gray-500">Cores, fotos e história</p>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => casais[0] && navigate(`/casais/${casais[0].id}/presentes`)}
+                            className="w-full flex items-center justify-between p-6 bg-white rounded-3xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all group"
+                        >
+                            <div className="flex items-center gap-4 text-left">
+                                <div className="p-3 bg-red-50 rounded-2xl text-red-500 group-hover:scale-110 transition-transform">
+                                    <Plus size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-gray-900">Lista de Presentes</h4>
+                                    <p className="text-xs text-gray-500">Adicionar/remover itens</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Lista de Casais / Detalhes (Ocultar se já tiver um principal ou expandir funcionalidade) */}
+                {casais.length === 0 && !showForm && (
+                    <div className="card text-center py-20 bg-white/50 backdrop-blur-sm border-dashed border-2 border-primary-200">
+                        <Heart className="mx-auto text-primary-300 mb-6" size={64} />
+                        <h2 className="text-2xl font-serif font-semibold text-gray-900 mb-4">Bem-vindos!</h2>
+                        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                            Comece criando o seu perfil de casal para ativar a lista de presentes e o site.
                         </p>
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="btn btn-primary px-8"
+                        >
+                            Começar Agora
+                        </button>
+                    </div>
+                )}
 
-                        <div className="space-y-5">
-                            <div>
-                                <label className="label">Nova Chave PIX</label>
-                                <input
-                                    type="text"
-                                    value={newPixKey}
-                                    onChange={(e) => setNewPixKey(e.target.value)}
-                                    className="input-field"
-                                    placeholder="CPF, Email, Telefone ou Chave Aleatória"
-                                    required
-                                />
+                {casais.map((casal) => (
+                    <div key={casal.id} className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up">
+                        <div className="card p-8 bg-white shadow-sm border border-gray-100 rounded-[2rem]">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
+                                    <Users size={24} />
+                                </div>
+                                <h3 className="text-xl font-serif font-bold text-gray-900">Informações</h3>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                                    <span className="text-sm font-medium text-gray-500">Parceiro(a)</span>
+                                    <span className="text-sm font-bold text-gray-900">{casal.email_usuario_2}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
+                                    <span className="text-sm font-medium text-gray-500">Data do Casamento</span>
+                                    <span className="text-sm font-bold text-gray-900">{formatarData(casal.data_casamento)}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-4 bg-[#fdfbf7] border border-primary-100 rounded-2xl relative overflow-hidden group">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-[#a89073] uppercase tracking-wider">Sua Chave PIX</span>
+                                        <span className="text-sm font-bold text-gray-900 truncate max-w-[150px]">{casal.chave_pix || 'Não configurada'}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setNewPixKey(casal.chave_pix || '');
+                                            setShowPixModal(true);
+                                        }}
+                                        className="p-2 hover:bg-white rounded-xl text-primary-600 transition-colors border border-transparent hover:border-primary-100"
+                                    >
+                                        <CreditCard size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Espaço para Dicas ou Atalhos Secundários */}
+                        <div className="card p-8 bg-gradient-to-br from-primary-50 to-primary-100/50 text-primary-900 rounded-[2rem] border border-primary-100 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 className="text-2xl font-serif font-bold mb-4 text-primary-800">Dica de Ouro</h3>
+                                <p className="text-primary-600/80 text-sm leading-relaxed mb-6">
+                                    Adicione pelo menos 5 presentes de diferentes faixas de preço para dar opções aos seus convidados. Presentes via PIX caem direto na sua conta!
+                                </p>
+                            </div>
+                            <div className="bg-white/50 backdrop-blur-md rounded-2xl p-4 flex items-center gap-4 border border-primary-100">
+                                <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                                    <Share2 size={18} />
+                                </div>
+                                <p className="text-xs font-medium text-primary-700">Link do site ativo: <span className="underline opacity-80 decoration-1">voucasar.com/{template?.slug || casal.id}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                {/* Modal Pix (Ajustado) */}
+                {showPixModal && (
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl animate-scale-in">
+                            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-2">Configurar PIX</h3>
+                            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                                Insira sua chave PIX principal. É para esta chave que os presentes financeiros serão enviados.
+                            </p>
+                            <input
+                                type="text"
+                                value={newPixKey}
+                                onChange={(e) => setNewPixKey(e.target.value)}
+                                className="w-full h-12 px-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-primary-400 outline-none mb-6 font-medium"
+                                placeholder="CPF, E-mail ou Aleatória"
+                            />
+                            <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowPixModal(false)}
-                                    className="btn btn-secondary flex-1"
+                                    className="flex-1 h-12 rounded-2xl font-bold text-gray-500 hover:bg-gray-50 transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={async () => {
-                                        try {
-                                            setLoading(true);
-                                            await casalAPI.atualizar(casais[0].id, {
-                                                ...casais[0],
-                                                chave_pix: newPixKey
-                                            });
-                                            await carregarCasais();
-                                            setShowPixModal(false);
-                                        } catch (err) {
-                                            setError('Erro ao atualizar chave PIX');
-                                        } finally {
-                                            setLoading(false);
+                                        if (casais[0]) {
+                                            try {
+                                                await casalAPI.atualizar(casais[0].id, { ...casais[0], chave_pix: newPixKey });
+                                                setShowPixModal(false);
+                                                carregarCasais();
+                                            } catch (e) { setError('Erro ao atualizar PIX'); }
                                         }
                                     }}
-                                    className="btn btn-primary flex-1"
+                                    className="flex-1 h-12 bg-primary-600 text-white rounded-2xl font-bold shadow-lg shadow-primary-100"
                                 >
-                                    Salvar Alteração
+                                    Salvar
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
