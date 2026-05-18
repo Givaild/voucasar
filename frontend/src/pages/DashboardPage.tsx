@@ -30,8 +30,11 @@ export const DashboardPage: React.FC = () => {
             .toLowerCase()
             .replace(/[^a-z0-9\-]/g, '-')
             .replace(/-+/g, '-')
-            .replace(/^-+|-+$/g, '') : String(id));
-        const url = `${window.location.origin}/casamento/${slug}`;
+            .replace(/^-+|-+$/g, '') : null);
+
+        const urlOrPath = slug ? `/casamento/${slug}` : `/casamento/${id}`;
+        const url = `${window.location.origin}${urlOrPath}`;
+
         navigator.clipboard.writeText(url);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
@@ -175,7 +178,11 @@ export const DashboardPage: React.FC = () => {
                                 </button>
                             )}
                             <button
-                                onClick={() => navigate(`/casamento/${template?.slug || casais[0]?.id}`)}
+                                onClick={() => {
+                                    const slug = template?.slug;
+                                    const path = slug ? `/casamento/${slug}` : `/casamento/${casais[0]?.id}`;
+                                    navigate(path);
+                                }}
                                 className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 hover:border-primary-200 text-gray-700 rounded-xl text-xs font-bold transition-all whitespace-nowrap shadow-sm"
                             >
                                 <Eye size={14} /> Ver Site
