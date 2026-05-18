@@ -21,6 +21,7 @@ def inserir(template: Template) -> Optional[int]:
             cursor = conn.cursor()
             cursor.execute(INSERIR, (
                 template.id_casal,
+                template.slug,
                 template.foto_casal_vertical,
                 template.foto_casal_horizontal,
                 template.texto_casal,
@@ -41,6 +42,7 @@ def atualizar(template: Template) -> bool:
         with get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(ATUALIZAR, (
+                template.slug,
                 template.foto_casal_vertical,
                 template.foto_casal_horizontal,
                 template.texto_casal,
@@ -67,16 +69,41 @@ def buscar_por_casal(id_casal: int) -> Optional[Template]:
                 return Template(
                     id=resultado[0],
                     id_casal=resultado[1],
-                    foto_casal_vertical=resultado[2],
-                    foto_casal_horizontal=resultado[3],
-                    texto_casal=resultado[4],
-                    nomes_noivos=resultado[5],
-                    local_cerimonia=resultado[6],
-                    local_recepcao=resultado[7]
+                    slug=resultado[2],
+                    foto_casal_vertical=resultado[3],
+                    foto_casal_horizontal=resultado[4],
+                    texto_casal=resultado[5],
+                    nomes_noivos=resultado[6],
+                    local_cerimonia=resultado[7],
+                    local_recepcao=resultado[8]
                 )
             return None
     except Exception as e:
         print(f"Erro ao buscar template por casal: {e}")
+        return None
+
+def buscar_por_slug(slug: str) -> Optional[Template]:
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(BUSCAR_POR_SLUG, (slug,))
+            resultado = cursor.fetchone()
+            cursor.close()
+            if resultado:
+                return Template(
+                    id=resultado[0],
+                    id_casal=resultado[1],
+                    slug=resultado[2],
+                    foto_casal_vertical=resultado[3],
+                    foto_casal_horizontal=resultado[4],
+                    texto_casal=resultado[5],
+                    nomes_noivos=resultado[6],
+                    local_cerimonia=resultado[7],
+                    local_recepcao=resultado[8]
+                )
+            return None
+    except Exception as e:
+        print(f"Erro ao buscar template por slug: {e}")
         return None
 
 def buscar_por_id(template_id: int) -> Optional[Template]:
@@ -90,14 +117,43 @@ def buscar_por_id(template_id: int) -> Optional[Template]:
                 return Template(
                     id=resultado[0],
                     id_casal=resultado[1],
-                    foto_casal_vertical=resultado[2],
-                    foto_casal_horizontal=resultado[3],
-                    texto_casal=resultado[4],
-                    nomes_noivos=resultado[5],
-                    local_cerimonia=resultado[6],
-                    local_recepcao=resultado[7]
+                    slug=resultado[2],
+                    foto_casal_vertical=resultado[3],
+                    foto_casal_horizontal=resultado[4],
+                    texto_casal=resultado[5],
+                    nomes_noivos=resultado[6],
+                    local_cerimonia=resultado[7],
+                    local_recepcao=resultado[8]
                 )
             return None
+    except Exception as e:
+        print(f"Erro ao buscar template por id: {e}")
+        return None
+
+def listar_todos() -> list[Template]:
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(LISTAR_TODOS)
+            resultados = cursor.fetchall()
+            cursor.close()
+            templates = []
+            for resultado in resultados:
+                templates.append(Template(
+                    id=resultado[0],
+                    id_casal=resultado[1],
+                    slug=resultado[2],
+                    foto_casal_vertical=resultado[3],
+                    foto_casal_horizontal=resultado[4],
+                    texto_casal=resultado[5],
+                    nomes_noivos=resultado[6],
+                    local_cerimonia=resultado[7],
+                    local_recepcao=resultado[8]
+                ))
+            return templates
+    except Exception as e:
+        print(f"Erro ao listar templates: {e}")
+        return []
     except Exception as e:
         print(f"Erro ao buscar template por id: {e}")
         return None

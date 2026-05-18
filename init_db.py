@@ -1,5 +1,5 @@
 import logging
-from backend.data.repo import usuario, casal, presente, fonte_compra, transacao_presente
+from backend.data.repo import usuario, casal, presente, fonte_compra, transacao_presente, template
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,6 +15,7 @@ def init_database():
             ("Presente", presente.criar_tabela),
             ("FonteCompra", fonte_compra.criar_tabela),
             ("TransacaoPresente", transacao_presente.criar_tabela),
+            ("Template", template.criar_tabela),
         ]
         
         for table_name, create_func in tables:

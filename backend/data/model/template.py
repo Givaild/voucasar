@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class Template:
     id: int
     id_casal: int
+    slug: str
     foto_casal_vertical: str
     foto_casal_horizontal: str
     texto_casal: str

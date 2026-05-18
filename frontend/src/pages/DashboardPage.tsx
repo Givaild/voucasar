@@ -23,13 +23,13 @@ export const DashboardPage: React.FC = () => {
     const [template, setTemplate] = useState<any>(null);
 
     const handleCopyLink = (id: number) => {
-        const slug = template?.nomes_noivos ? template.nomes_noivos
+        const slug = template?.slug || (template?.nomes_noivos ? template.nomes_noivos
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
             .toLowerCase()
             .replace(/[^a-z0-9\-]/g, '-')
             .replace(/-+/g, '-')
-            .replace(/^-+|-+$/g, '') : String(id);
+            .replace(/^-+|-+$/g, '') : String(id));
         const url = `${window.location.origin}/casamento/${slug}`;
         navigator.clipboard.writeText(url);
         setCopiedId(id);
@@ -163,12 +163,12 @@ export const DashboardPage: React.FC = () => {
                             </h2>
                             <h1 className="text-3xl md:text-4xl font-serif font-semibold text-gray-900 leading-tight">
                                 {template?.nomes_noivos || usuario?.nome || 'Usuário'}
-                              </h1>
-                              {casais[0] && (
-                                  <p className="text-xs text-gray-500 font-medium mt-1">
-                                      Casamento em: {new Date(casais[0].data_casamento).toLocaleDateString('pt-BR')}
-                                  </p>
-                              )}
+                            </h1>
+                            {casais[0] && (
+                                <p className="text-xs text-gray-500 font-medium mt-1">
+                                    Casamento em: {new Date(casais[0].data_casamento).toLocaleDateString('pt-BR')}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -336,13 +336,13 @@ export const DashboardPage: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        const slug = template?.nomes_noivos ? template.nomes_noivos
+                                        const slug = template?.slug || (template?.nomes_noivos ? template.nomes_noivos
                                             .normalize('NFD')
                                             .replace(/[\u0300-\u036f]/g, '')
                                             .toLowerCase()
                                             .replace(/[^a-z0-9\-]/g, '-')
                                             .replace(/-+/g, '-')
-                                            .replace(/^-+|-+$/g, '') : String(casais[0].id);
+                                            .replace(/^-+|-+$/g, '') : String(casais[0].id));
                                         window.open(`/casamento/${slug}`, '_blank');
                                     }}
                                     className="btn btn-secondary p-3"
