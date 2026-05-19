@@ -129,6 +129,11 @@ export const casalAPI = {
         const response = await api.get(`/casal/publico/${id}`);
         return response.data;
     },
+    desvincularparceiro: async (casalId: number) => {
+        const response = await api.delete(`/casal/${casalId}/parceiro`);
+        return response.data;
+    },
+
 };
 
 // Presente APIs

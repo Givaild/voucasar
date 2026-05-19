@@ -4,6 +4,7 @@ import logging
 from util.auth_decorator import requer_autenticacao
 from backend.data.model.casal import Casal
 from backend.data.repo import casal as casal_repo
+from backend.data.repo import usuario as usuario_repo
 
 router = APIRouter(prefix="/casal", tags=["casal"])
 logger = logging.getLogger(__name__)
@@ -73,6 +74,19 @@ async def atualizar_casal_endpoint(casal_id: int, request: Request, usuario_loga
         casal.data_casamento = casal_data.get("data_casamento", casal.data_casamento)
         
         casal_repo.atualizar(casal)
+
+        # Se o email_usuario_2 mudou, tentar auto-vincular imediatamente
+        # caso já exista uma conta com esse email
+        if casal.email_usuario_2 and (not casal.id_usuario_2 or casal.id_usuario_2 == 0):
+            try:
+                usuario_existente = usuario_repo.buscar_por_email(casal.email_usuario_2)
+                if usuario_existente:
+                    casal_repo.vincular_por_email(casal.email_usuario_2, usuario_existente.id)
+                    casal.id_usuario_2 = usuario_existente.id
+                    logger.info(f"Parceiro auto-vinculado após atualização de email: {casal.email_usuario_2}")
+            except Exception as link_err:
+                logger.warning(f"Não foi possível auto-vincular parceiro na atualização: {link_err}")
+
         return JSONResponse({
             "id": casal.id,
             "id_usuario_1": casal.id_usuario_1,
@@ -96,6 +110,31 @@ async def deletar_casal_endpoint(casal_id: int, request: Request, usuario_logado
     except Exception as e:
         logger.error(f"Erro ao deletar casal: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.delete("/{casal_id}/parceiro")
+@requer_autenticacao()
+async def desvincular_parceiro_endpoint(casal_id: int, request: Request, usuario_logado: dict = None):
+    """Remove a vinculação do parceiro(a) ao casal. Pode ser feito pelo criador ou pelo próprio parceiro."""
+    try:
+        casal = casal_repo.buscar_por_id(casal_id)
+        if not casal:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casal não encontrado")
+
+        usuario_id = usuario_logado.get("id")
+        if casal.id_usuario_1 != usuario_id and casal.id_usuario_2 != usuario_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sem permissão para desvincular este casal")
+
+        desvinculou = casal_repo.desvincular_parceiro(casal_id, usuario_id)
+        if not desvinculou:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhum parceiro vinculado para remover")
+
+        return JSONResponse({"mensagem": "Parceiro(a) desvinculado(a) com sucesso"})
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Erro ao desvincular parceiro: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
 
 @router.get("/publico/{casal_id}")
 async def buscar_casal_publico(casal_id: int):

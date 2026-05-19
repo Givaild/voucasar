@@ -6,6 +6,7 @@ from util.security import criar_hash_senha, verificar_senha
 from util.csrf import csrf_protection
 from backend.data.model.usuario import Usuario
 from backend.data.repo import usuario as usuario_repo
+from backend.data.repo import casal as casal_repo
 
 router = APIRouter(prefix="/usuario", tags=["usuario"])
 logger = logging.getLogger(__name__)
@@ -22,6 +23,11 @@ async def criar_usuario(request: Request, usuario_data: dict = Body(...)):
             senha=senha_hash
         )
         cod_usuario = usuario_repo.inserir(usuario)
+        # Auto-vincular ao casal caso o email já tenha sido adicionado como parceiro(a)
+        try:
+            casal_repo.vincular_por_email(usuario.email, cod_usuario)
+        except Exception as link_err:
+            logger.warning(f"Não foi possível auto-vincular parceiro no registro: {link_err}")
         return JSONResponse({
             "id": cod_usuario,
             "nome": usuario.nome,
@@ -116,7 +122,11 @@ async def login(request: Request, credenciais: dict = Body(...)):
         }
         
         criar_sessao(request, usuario_dict)
-        
+        # Auto-vincular ao casal caso o email ainda não tenha sido linkado
+        try:
+            casal_repo.vincular_por_email(usuario.email, usuario.id)
+        except Exception as link_err:
+            logger.warning(f"Não foi possível auto-vincular parceiro no login: {link_err}")
         return JSONResponse({
             "usuario": usuario_dict,
             "mensagem": "Login realizado com sucesso"

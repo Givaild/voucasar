@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { casalAPI, Casal, templateAPI } from '../lib/services';
-import { Heart, Plus, AlertCircle, Loader, Edit2, Trash2, Users, Eye, Share2, Copy, CheckCircle2, CreditCard, LogOut } from 'lucide-react';
+import { Heart, Plus, AlertCircle, Loader, Edit2, Trash2, Users, Eye, Share2, Copy, CheckCircle2, CreditCard, LogOut, UserX, Link2, Clock } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
     const { usuario, logout } = useAuth();
@@ -13,6 +13,11 @@ export const DashboardPage: React.FC = () => {
     const [showForm, setShowForm] = useState(false);
     const [showPixModal, setShowPixModal] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showUnlinkModal, setShowUnlinkModal] = useState(false);
+    const [unlinkLoading, setUnlinkLoading] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteLoading, setInviteLoading] = useState(false);
     const [newPixKey, setNewPixKey] = useState('');
     const [formData, setFormData] = useState({
         emailNoivo: '',
@@ -382,9 +387,54 @@ export const DashboardPage: React.FC = () => {
                             </div>
 
                             <div className="space-y-6">
-                                <div className="flex justify-between items-center p-4 bg-primary-50/30 rounded-2xl">
-                                    <span className="text-sm font-medium text-gray-500">Parceiro(a)</span>
-                                    <span className="text-sm font-bold text-gray-900">{casal.email_usuario_2}</span>
+                                {/* Parceiro(a) — status de vínculo */}
+                                <div className="p-4 bg-primary-50/30 rounded-2xl">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-sm font-medium text-gray-500">Parceiro(a)</span>
+                                            {casal.email_usuario_2 ? (
+                                                <span className="text-sm font-bold text-gray-900 break-all">{casal.email_usuario_2}</span>
+                                            ) : (
+                                                <span className="text-xs text-gray-400 italic">Sem parceiro(a) vinculado(a)</span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                            {/* Badge de status */}
+                                            {casal.email_usuario_2 && (
+                                                casal.id_usuario_2 && casal.id_usuario_2 > 0 ? (
+                                                    <span className="flex items-center gap-1 text-[10px] font-bold tracking-wide text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                                                        <Link2 size={10} /> Vinculada
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-1 text-[10px] font-bold tracking-wide text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                                                        <Clock size={10} /> Aguardando conta
+                                                    </span>
+                                                )
+                                            )}
+                                            {/* Sem parceiro — botão convidar (só para o criador) */}
+                                            {!casal.email_usuario_2 && casal.id_usuario_1 === usuario?.id && (
+                                                <button
+                                                    onClick={() => { setInviteEmail(''); setShowInviteModal(true); }}
+                                                    className="flex items-center gap-1 text-[10px] font-bold text-primary-600 hover:text-primary-800 hover:bg-primary-50 px-2 py-1 rounded-full transition-colors border border-transparent hover:border-primary-100"
+                                                >
+                                                    <Plus size={10} /> Convidar Parceiro(a)
+                                                </button>
+                                            )}
+                                            {/* Botão desvincular — visível para quem tem permissão */}
+                                            {casal.email_usuario_2 && (
+                                                (casal.id_usuario_1 === usuario?.id || casal.id_usuario_2 === usuario?.id) && (
+                                                    <button
+                                                        onClick={() => setShowUnlinkModal(true)}
+                                                        className="flex items-center gap-1 text-[10px] font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-full transition-colors border border-transparent hover:border-red-100"
+                                                        title="Desvincular parceiro(a)"
+                                                    >
+                                                        <UserX size={10} />
+                                                        {casal.id_usuario_1 === usuario?.id ? 'Remover' : 'Desvincular-me'}
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="flex justify-between items-center p-4 bg-primary-50/30 rounded-2xl">
                                     <span className="text-sm font-medium text-gray-500">Data do Casamento</span>
@@ -455,6 +505,109 @@ export const DashboardPage: React.FC = () => {
                                     className="flex-1 h-12 bg-primary-600 text-white rounded-2xl font-bold shadow-lg shadow-primary-100"
                                 >
                                     Salvar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Convidar Nova Parceiro(a) */}
+                {showInviteModal && casais[0] && (
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl animate-scale-in">
+                            <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Heart className="text-primary-500" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-2 text-center">Convidar Parceiro(a)</h3>
+                            <p className="text-sm text-gray-500 mb-6 text-center leading-relaxed">
+                                Informe o email da sua parceira. Se ela já tiver uma conta, será vinculada automaticamente. Se não, o vínculo acontece assim que ela criar a conta.
+                            </p>
+                            <input
+                                type="email"
+                                value={inviteEmail}
+                                onChange={(e) => setInviteEmail(e.target.value)}
+                                className="w-full h-12 px-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-primary-400 outline-none mb-6 font-medium"
+                                placeholder="email@exemplo.com"
+                                autoFocus
+                            />
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowInviteModal(false)}
+                                    disabled={inviteLoading}
+                                    className="flex-1 h-12 rounded-2xl font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    disabled={inviteLoading || !inviteEmail}
+                                    onClick={async () => {
+                                        if (!inviteEmail) return;
+                                        setInviteLoading(true);
+                                        try {
+                                            await casalAPI.atualizar(casais[0].id, {
+                                                ...casais[0],
+                                                email_usuario_2: inviteEmail,
+                                                id_usuario_2: 0,
+                                            });
+                                            setShowInviteModal(false);
+                                            setInviteEmail('');
+                                            await carregarCasais();
+                                        } catch (e) {
+                                            setError('Erro ao convidar parceiro(a)');
+                                            setShowInviteModal(false);
+                                        } finally {
+                                            setInviteLoading(false);
+                                        }
+                                    }}
+                                    className="flex-1 h-12 bg-primary-600 text-white rounded-2xl font-bold shadow-lg shadow-primary-100 hover:bg-primary-700 transition-colors disabled:opacity-60"
+                                >
+                                    {inviteLoading ? 'Salvando...' : 'Convidar'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal Desvincular Parceiro */}
+                {showUnlinkModal && casais[0] && (
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl animate-scale-in text-center">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <UserX className="text-red-500" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-serif font-bold text-gray-900 mb-2">Desvincular Parceiro(a)</h3>
+                            <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                                {casais[0].id_usuario_1 === usuario?.id
+                                    ? 'Isso irá remover o acesso da parceira a este casamento e apagar o email vinculado. Ela precisará ser convidada novamente.'
+                                    : 'Você não terá mais acesso a este casamento no seu painel. O criador poderá re-convidar você pelo email.'}
+                            </p>
+                            <p className="text-xs font-bold text-red-500 mb-8">Esta ação não pode ser desfeita.</p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowUnlinkModal(false)}
+                                    disabled={unlinkLoading}
+                                    className="flex-1 h-12 rounded-2xl font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    disabled={unlinkLoading}
+                                    onClick={async () => {
+                                        setUnlinkLoading(true);
+                                        try {
+                                            await casalAPI.desvincularparceiro(casais[0].id);
+                                            setShowUnlinkModal(false);
+                                            await carregarCasais();
+                                        } catch (e) {
+                                            setError('Erro ao desvincular parceiro(a)');
+                                            setShowUnlinkModal(false);
+                                        } finally {
+                                            setUnlinkLoading(false);
+                                        }
+                                    }}
+                                    className="flex-1 h-12 bg-red-500 text-white rounded-2xl font-bold shadow-lg shadow-red-100 hover:bg-red-600 transition-colors disabled:opacity-60"
+                                >
+                                    {unlinkLoading ? 'Removendo...' : 'Confirmar'}
                                 </button>
                             </div>
                         </div>

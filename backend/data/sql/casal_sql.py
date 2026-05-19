@@ -47,3 +47,21 @@ UPDATE Casal
 SET id_usuario_1 = %s, id_usuario_2 = %s, email_usuario_2 = %s, chave_pix = %s, data_casamento = %s
 WHERE id = %s;
 """
+
+BUSCAR_POR_EMAIL_USUARIO_2 = """
+SELECT id, id_usuario_1, id_usuario_2, email_usuario_2, chave_pix, data_casamento
+FROM Casal
+WHERE email_usuario_2 = %s AND (id_usuario_2 IS NULL OR id_usuario_2 = 0);
+"""
+
+VINCULAR_USUARIO_2 = """
+UPDATE Casal
+SET id_usuario_2 = %s
+WHERE email_usuario_2 = %s AND (id_usuario_2 IS NULL OR id_usuario_2 = 0);
+"""
+
+DESVINCULAR_PARCEIRO = """
+UPDATE Casal
+SET id_usuario_2 = 0, email_usuario_2 = NULL
+WHERE id = %s AND (id_usuario_1 = %s OR id_usuario_2 = %s);
+"""

@@ -135,3 +135,31 @@ def buscar_por_id(cod_casal: int) -> Optional[Casal]:
     except Exception as e:
         print(f"Erro ao buscar casal por id: {e}")
         return None
+
+def vincular_por_email(email: str, id_usuario: int) -> bool:
+    """Vincula um usuário ao casal onde ele é o parceiro pelo email (auto-link no registro/login)"""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(VINCULAR_USUARIO_2, (id_usuario, email))
+            conn.commit()
+            vinculou = cursor.rowcount > 0
+            cursor.close()
+            return vinculou
+    except Exception as e:
+        print(f"Erro ao vincular usuario_2: {e}")
+        return False
+
+def desvincular_parceiro(casal_id: int, usuario_id: int) -> bool:
+    """Remove a vinculação do parceiro ao casal. Pode ser feito pelo criador ou pelo parceiro."""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(DESVINCULAR_PARCEIRO, (casal_id, usuario_id, usuario_id))
+            conn.commit()
+            desvinculou = cursor.rowcount > 0
+            cursor.close()
+            return desvinculou
+    except Exception as e:
+        print(f"Erro ao desvincular parceiro: {e}")
+        return False
