@@ -154,13 +154,13 @@ from backend.routers.transacao_presente import router as transacao_presente_rout
 from backend.routers.template import router as template_router
 from util.csrf import csrf_protection
 
-# Incluindo routers
-app.include_router(usuario_router)
-app.include_router(casal_router)
-app.include_router(presente_router)
-app.include_router(fonte_compra_router)
-app.include_router(transacao_presente_router)
-app.include_router(template_router)
+# Incluindo routers com prefixo /api
+app.include_router(usuario_router, prefix="/api")
+app.include_router(casal_router, prefix="/api")
+app.include_router(presente_router, prefix="/api")
+app.include_router(fonte_compra_router, prefix="/api")
+app.include_router(transacao_presente_router, prefix="/api")
+app.include_router(template_router, prefix="/api")
 
 @app.get("/")
 async def root():

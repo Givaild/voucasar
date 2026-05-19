@@ -99,7 +99,7 @@ export const DashboardPage: React.FC = () => {
                 data_casamento: formData.dataCasamento,
                 chave_pix: formData.chavePix,
             } as Casal);
-            
+
             // Criar template automaticamente com os nomes dos noivos
             if (novosCasais.id && usuario?.nome) {
                 try {
@@ -111,7 +111,7 @@ export const DashboardPage: React.FC = () => {
                     console.log('Aviso: não foi possível criar template automaticamente', templateErr);
                 }
             }
-            
+
             setFormData({
                 emailNoivo: '',
                 dataCasamento: '',
