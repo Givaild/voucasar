@@ -139,7 +139,7 @@ export const RegisterPage: React.FC = () => {
                                     value={nome}
                                     onChange={(e) => setNome(e.target.value)}
                                     className="w-full bg-white border border-gray-100 focus:border-primary-400 focus:ring-4 focus:ring-primary-400/10 rounded-2xl py-3.5 pl-11 pr-4 text-gray-900 text-sm transition-all outline-none shadow-sm"
-                                    placeholder="João Silva"
+                                    placeholder="Pedro Silva"
                                     required
                                 />
                             </div>

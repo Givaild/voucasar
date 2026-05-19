@@ -278,9 +278,77 @@ export const DashboardPage: React.FC = () => {
                 </div>
 
                 {/* Lista de Casais / Detalhes (Ocultar se já tiver um principal ou expandir funcionalidade) */}
-                {casais.length === 0 && !showForm && (
-                    <div className="card text-center py-20 bg-[#fffcf8] border-dashed border-2 border-primary-200">
-                        {/* ...existing code... */}
+                {casais.length === 0 && (
+                    <div className="card max-w-2xl mx-auto border-primary-200 p-8 bg-white rounded-[2rem] shadow-sm">
+                        <div className="text-center mb-8">
+                            <Heart className="mx-auto text-primary-300 mb-4" size={48} />
+                            <h3 className="text-2xl font-serif font-semibold text-gray-900">
+                                Configure Seu Casamento
+                            </h3>
+                            <p className="text-gray-600 mt-2">
+                                Preencha as informações básicas para começar
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="text-[10px] font-bold tracking-[0.1em] text-[#a89073] uppercase ml-1">Email do Parceiro(a)</label>
+                                <input
+                                    type="email"
+                                    value={formData.emailNoivo}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            emailNoivo: e.target.value,
+                                        })
+                                    }
+                                    className="w-full h-12 px-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-primary-400 outline-none font-medium"
+                                    placeholder="email@exemplo.com"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold tracking-[0.1em] text-[#a89073] uppercase ml-1">Data do Casamento</label>
+                                <input
+                                    type="date"
+                                    value={formData.dataCasamento}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            dataCasamento: e.target.value,
+                                        })
+                                    }
+                                    className="w-full h-12 px-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-primary-400 outline-none font-medium"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold tracking-[0.1em] text-[#a89073] uppercase ml-1">Chave PIX para Presentes</label>
+                                <input
+                                    type="text"
+                                    value={formData.chavePix}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            chavePix: e.target.value,
+                                        })
+                                    }
+                                    className="w-full h-12 px-4 bg-gray-50 border border-gray-100 rounded-2xl focus:border-primary-400 outline-none font-medium"
+                                    placeholder="Apenas Chave Aleatória"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full h-14 bg-primary-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-primary-100 hover:bg-primary-700 transition-all mt-4"
+                                disabled={loading}
+                            >
+                                {loading ? 'Salvando...' : 'Criar Meu Casamento'}
+                            </button>
+                        </form>
                     </div>
                 )}
 
