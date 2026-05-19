@@ -222,10 +222,11 @@ export const DashboardPage: React.FC = () => {
                                     { label: 'Minutos', value: countdown.minutos },
                                     { label: 'Segundos', value: countdown.segundos },
                                 ].map((item, idx) => (
-                                    <div key={idx} className="bg-white rounded-2xl p-4 md:p-6 border border-primary-50 shadow-sm transition-transform hover:scale-[1.02]">
+                                    <div key={idx} className="bg-primary-100 rounded-2xl p-4 md:p-6 border border-primary-200 shadow-sm transition-transform hover:scale-[1.02]">
                                         <span className="text-3xl md:text-5xl font-serif text-[#1e293b] leading-none block mb-2">
                                             {String(item.value).padStart(2, '0')}
                                         </span>
+
                                         <span className="text-[9px] md:text-[11px] font-bold tracking-[0.1em] text-[#d6aa65] uppercase">
                                             {item.label}
                                         </span>
