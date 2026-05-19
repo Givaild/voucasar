@@ -17,8 +17,8 @@ async def criar_casal(request: Request, usuario_logado: dict = None):
         casal_data = await request.json()
         casal = Casal(
             id=0,
-            id_usuario_1=casal_data.get("id_usuario_1"),
-            id_usuario_2=casal_data.get("id_usuario_2"),
+            id_usuario_1=usuario_logado.get("id"),  # Sempre usa o ID do usuário logado, nunca do body
+            id_usuario_2=None,
             email_usuario_2=casal_data.get("email_usuario_2"),
             chave_pix=casal_data.get("chave_pix"),
             data_casamento=casal_data.get("data_casamento")
@@ -40,11 +40,15 @@ async def criar_casal(request: Request, usuario_logado: dict = None):
 @router.get("/{casal_id}")
 @requer_autenticacao()
 async def buscar_casal_endpoint(casal_id: int, request: Request, usuario_logado: dict = None):
-    """Busca um casal por ID"""
+    """Busca um casal por ID — somente membros do casal podem acessar"""
     try:
         casal = casal_repo.buscar_por_id(casal_id)
         if not casal:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casal não encontrado")
+        # SEGURANÇA: Somente membros do casal podem ver os dados completos
+        usuario_id = usuario_logado.get("id")
+        if casal.id_usuario_1 != usuario_id and casal.id_usuario_2 != usuario_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
         return JSONResponse({
             "id": casal.id,
             "id_usuario_1": casal.id_usuario_1,
@@ -53,6 +57,8 @@ async def buscar_casal_endpoint(casal_id: int, request: Request, usuario_logado:
             "chave_pix": casal.chave_pix,
             "data_casamento": str(casal.data_casamento)
         })
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Erro ao buscar casal: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -60,32 +66,24 @@ async def buscar_casal_endpoint(casal_id: int, request: Request, usuario_logado:
 @router.put("/{casal_id}")
 @requer_autenticacao()
 async def atualizar_casal_endpoint(casal_id: int, request: Request, usuario_logado: dict = None):
-    """Atualiza um casal"""
+    """Atualiza um casal — somente o criador (usuario_1) pode editar"""
     try:
         casal_data = await request.json()
         casal = casal_repo.buscar_por_id(casal_id)
         if not casal:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casal não encontrado")
         
-        casal.id_usuario_1 = casal_data.get("id_usuario_1", casal.id_usuario_1)
-        casal.id_usuario_2 = casal_data.get("id_usuario_2", casal.id_usuario_2)
+        # SEGURANÇA: Somente o criador do casal pode editá-lo (previne IDOR)
+        usuario_id = usuario_logado.get("id")
+        if casal.id_usuario_1 != usuario_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado: somente o criador do casal pode editá-lo")
+        
+        # SEGURANÇA: id_usuario_1 não pode ser alterado via body (fixado ao criador)
         casal.email_usuario_2 = casal_data.get("email_usuario_2", casal.email_usuario_2)
         casal.chave_pix = casal_data.get("chave_pix", casal.chave_pix)
         casal.data_casamento = casal_data.get("data_casamento", casal.data_casamento)
         
         casal_repo.atualizar(casal)
-
-        # Se o email_usuario_2 mudou, tentar auto-vincular imediatamente
-        # caso já exista uma conta com esse email
-        if casal.email_usuario_2 and (not casal.id_usuario_2 or casal.id_usuario_2 == 0):
-            try:
-                usuario_existente = usuario_repo.buscar_por_email(casal.email_usuario_2)
-                if usuario_existente:
-                    casal_repo.vincular_por_email(casal.email_usuario_2, usuario_existente.id)
-                    casal.id_usuario_2 = usuario_existente.id
-                    logger.info(f"Parceiro auto-vinculado após atualização de email: {casal.email_usuario_2}")
-            except Exception as link_err:
-                logger.warning(f"Não foi possível auto-vincular parceiro na atualização: {link_err}")
 
         return JSONResponse({
             "id": casal.id,
@@ -96,6 +94,8 @@ async def atualizar_casal_endpoint(casal_id: int, request: Request, usuario_loga
             "data_casamento": str(casal.data_casamento),
             "mensagem": "Casal atualizado com sucesso"
         })
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Erro ao atualizar casal: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -103,10 +103,18 @@ async def atualizar_casal_endpoint(casal_id: int, request: Request, usuario_loga
 @router.delete("/{casal_id}")
 @requer_autenticacao()
 async def deletar_casal_endpoint(casal_id: int, request: Request, usuario_logado: dict = None):
-    """Deleta um casal"""
+    """Deleta um casal — somente o criador pode deletar"""
     try:
+        casal = casal_repo.buscar_por_id(casal_id)
+        if not casal:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casal não encontrado")
+        # SEGURANÇA: Somente o criador do casal pode deletá-lo (previne IDOR)
+        if casal.id_usuario_1 != usuario_logado.get("id"):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado: somente o criador do casal pode deletá-lo")
         casal_repo.deletar(casal_id)
         return JSONResponse({"mensagem": "Casal deletado com sucesso"})
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Erro ao deletar casal: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -136,6 +144,46 @@ async def desvincular_parceiro_endpoint(casal_id: int, request: Request, usuario
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
+@router.post("/{casal_id}/aceitar-convite")
+@requer_autenticacao()
+async def aceitar_convite_endpoint(casal_id: int, request: Request, usuario_logado: dict = None):
+    """
+    Parceiro aceita explicitamente o convite para se vincular ao casal.
+    O e-mail do usuário logado deve coincidir com o email_usuario_2 cadastrado no casal.
+    """
+    try:
+        casal = casal_repo.buscar_por_id(casal_id)
+        if not casal:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casal não encontrado")
+
+        # Verifica se já tem parceiro vinculado
+        if casal.id_usuario_2 and casal.id_usuario_2 != 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Este casal já possui um parceiro vinculado")
+
+        # SEGURANÇA: Verifica se o e-mail do usuário logado bate com o e-mail do convite
+        if not casal.email_usuario_2:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhum convite pendente para este casal")
+
+        if casal.email_usuario_2.lower() != usuario_logado.get("email", "").lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não foi convidado para este casal"
+            )
+
+        # Vincula o parceiro com consentimento explícito
+        vinculou = casal_repo.vincular_por_email(casal.email_usuario_2, usuario_logado.get("id"))
+        if not vinculou:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Falha ao vincular parceiro")
+
+        logger.info(f"Parceiro {usuario_logado.get('email')} aceitou convite do casal {casal_id}")
+        return JSONResponse({"mensagem": "Convite aceito com sucesso! Você foi vinculado ao casal."})
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Erro ao aceitar convite: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
 @router.get("/publico/{casal_id}")
 async def buscar_casal_publico(casal_id: int):
     """Busca informações básicas de um casal publicamente"""
@@ -150,6 +198,24 @@ async def buscar_casal_publico(casal_id: int):
         })
     except Exception as e:
         logger.error(f"Erro ao buscar casal público: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/convites/pendentes")
+@requer_autenticacao()
+async def listar_convites_pendentes_endpoint(request: Request, usuario_logado: dict = None):
+    """Lista convites de casamento pendentes para o usuário logado"""
+    try:
+        casais = casal_repo.buscar_convites_pendentes(usuario_logado.get("email"))
+        return JSONResponse([
+            {
+                "id": c.id,
+                "id_usuario_1": c.id_usuario_1,
+                "email_usuario_2": c.email_usuario_2,
+                "data_casamento": str(c.data_casamento)
+            } for c in casais
+        ])
+    except Exception as e:
+        logger.error(f"Erro ao buscar convites pendentes: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("")

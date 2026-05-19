@@ -163,3 +163,25 @@ def desvincular_parceiro(casal_id: int, usuario_id: int) -> bool:
     except Exception as e:
         print(f"Erro ao desvincular parceiro: {e}")
         return False
+
+def buscar_convites_pendentes(email: str) -> list[Casal]:
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(BUSCAR_POR_EMAIL_USUARIO_2, (email,))
+            resultados = cursor.fetchall()
+            cursor.close()
+            casais = []
+            for resultado in resultados:
+                casais.append(Casal(
+                    id=resultado[0],
+                    id_usuario_1=resultado[1],
+                    id_usuario_2=resultado[2],
+                    email_usuario_2=resultado[3],
+                    chave_pix=resultado[4],
+                    data_casamento=resultado[5]
+                ))
+            return casais
+    except Exception as e:
+        print(f"Erro ao buscar convites pendentes: {e}")
+        return []

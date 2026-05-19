@@ -23,11 +23,8 @@ async def criar_usuario(request: Request, usuario_data: dict = Body(...)):
             senha=senha_hash
         )
         cod_usuario = usuario_repo.inserir(usuario)
-        # Auto-vincular ao casal caso o email já tenha sido adicionado como parceiro(a)
-        try:
-            casal_repo.vincular_por_email(usuario.email, cod_usuario)
-        except Exception as link_err:
-            logger.warning(f"Não foi possível auto-vincular parceiro no registro: {link_err}")
+        # REMOVIDO: auto-vinculação sem consentimento
+        # O parceiro deve aceitar o convite explicitamente via POST /casal/{id}/aceitar-convite
         return JSONResponse({
             "id": cod_usuario,
             "nome": usuario.nome,
@@ -41,8 +38,11 @@ async def criar_usuario(request: Request, usuario_data: dict = Body(...)):
 @router.get("/{usuario_id}")
 @requer_autenticacao()
 async def buscar_usuario_endpoint(usuario_id: int, request: Request, usuario_logado: dict = None):
-    """Busca um usuário por ID"""
+    """Busca um usuário por ID — somente o próprio usuário pode consultar seus dados"""
     try:
+        # SEGURANÇA: Usuário só pode ver seus próprios dados (previne IDOR)
+        if usuario_id != usuario_logado.get("id"):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
         usuario = usuario_repo.buscar_por_id(usuario_id)
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
@@ -51,6 +51,8 @@ async def buscar_usuario_endpoint(usuario_id: int, request: Request, usuario_log
             "nome": usuario.nome,
             "email": usuario.email
         })
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Erro ao buscar usuário: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -58,8 +60,11 @@ async def buscar_usuario_endpoint(usuario_id: int, request: Request, usuario_log
 @router.put("/{usuario_id}")
 @requer_autenticacao()
 async def atualizar_usuario_endpoint(usuario_id: int, request: Request, usuario_data: dict = Body(...), usuario_logado: dict = None):
-    """Atualiza um usuário"""
+    """Atualiza um usuário — somente o próprio usuário pode editar seus dados"""
     try:
+        # SEGURANÇA: Usuário só pode editar seus próprios dados (previne IDOR + account takeover)
+        if usuario_id != usuario_logado.get("id"):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
         usuario = usuario_repo.buscar_por_id(usuario_id)
         if not usuario:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
@@ -78,26 +83,14 @@ async def atualizar_usuario_endpoint(usuario_id: int, request: Request, usuario_
             "email": usuario.email,
             "mensagem": "Usuário atualizado com sucesso"
         })
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error(f"Erro ao atualizar usuário: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("")
-@requer_autenticacao()
-async def listar_usuarios_endpoint(request: Request, usuario_logado: dict = None):
-    """Lista todos os usuários"""
-    try:
-        usuarios = usuario_repo.listar_todos()
-        return JSONResponse([
-            {
-                "id": u.id,
-                "nome": u.nome,
-                "email": u.email
-            } for u in usuarios
-        ])
-    except Exception as e:
-        logger.error(f"Erro ao listar usuários: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+# REMOVIDO: GET /usuario (listagem global de todos os usuários)
+# Esse endpoint expunha nome + email de todos os usuários para qualquer pessoa autenticada.
 
 @router.post("/auth/login")
 async def login(request: Request, credenciais: dict = Body(...)):
@@ -122,11 +115,8 @@ async def login(request: Request, credenciais: dict = Body(...)):
         }
         
         criar_sessao(request, usuario_dict)
-        # Auto-vincular ao casal caso o email ainda não tenha sido linkado
-        try:
-            casal_repo.vincular_por_email(usuario.email, usuario.id)
-        except Exception as link_err:
-            logger.warning(f"Não foi possível auto-vincular parceiro no login: {link_err}")
+        # REMOVIDO: auto-vinculação sem consentimento no login
+        # O parceiro deve aceitar o convite explicitamente via POST /casal/{id}/aceitar-convite
         return JSONResponse({
             "usuario": usuario_dict,
             "mensagem": "Login realizado com sucesso"

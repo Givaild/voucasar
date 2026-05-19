@@ -133,7 +133,14 @@ export const casalAPI = {
         const response = await api.delete(`/casal/${casalId}/parceiro`);
         return response.data;
     },
-
+    aceitarConvite: async (casalId: number) => {
+        const response = await api.post(`/casal/${casalId}/aceitar-convite`);
+        return response.data;
+    },
+    listarConvites: async () => {
+        const response = await api.get('/casal/convites/pendentes');
+        return response.data;
+    },
 };
 
 // Presente APIs

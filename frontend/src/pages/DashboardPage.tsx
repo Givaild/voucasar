@@ -8,6 +8,7 @@ export const DashboardPage: React.FC = () => {
     const { usuario, logout } = useAuth();
     const navigate = useNavigate();
     const [casais, setCasais] = useState<Casal[]>([]);
+    const [convites, setConvites] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
@@ -80,6 +81,14 @@ export const DashboardPage: React.FC = () => {
             setLoading(true);
             const dados = await casalAPI.listar();
             setCasais(dados);
+            
+            try {
+                const convs = await casalAPI.listarConvites();
+                setConvites(convs || []);
+            } catch (err) {
+                console.log('Erro ao buscar convites:', err);
+            }
+
             if (dados && dados.length > 0) {
                 try {
                     const temp = await templateAPI.buscar(dados[0].id);
@@ -227,6 +236,40 @@ export const DashboardPage: React.FC = () => {
                     <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 text-red-700 mb-8 border border-red-100 animate-fade-in">
                         <AlertCircle className="flex-shrink-0 mt-0.5" size={18} />
                         <p className="text-sm font-medium">{error}</p>
+                    </div>
+                )}
+
+                {/* Convites Pendentes */}
+                {convites.length > 0 && (
+                    <div className="mb-8 space-y-4 animate-fade-in-up">
+                        {convites.map((convite) => (
+                            <div key={convite.id} className="bg-amber-50 border border-amber-200 p-6 rounded-[2rem] shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <Heart className="text-amber-600" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-serif font-bold text-amber-900">Você foi convidado(a)!</h3>
+                                        <p className="text-amber-700 text-sm mt-1">Para organizar o casamento programado para <strong>{formatarData(convite.data_casamento)}</strong>.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 w-full md:w-auto">
+                                    <button 
+                                        onClick={async () => {
+                                            try {
+                                                await casalAPI.aceitarConvite(convite.id);
+                                                await carregarCasais();
+                                            } catch(e) {
+                                                setError('Erro ao aceitar convite');
+                                            }
+                                        }}
+                                        className="flex-1 md:flex-none px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition-colors shadow-lg shadow-amber-200"
+                                    >
+                                        Aceitar Convite
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 
