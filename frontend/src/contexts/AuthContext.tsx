@@ -18,6 +18,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            import('../lib/api').then((module) => {
+                const api = module.default;
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            });
+        }
         checkAuth();
     }, []);
 

@@ -57,6 +57,7 @@ export interface TransacaoPresente {
 export interface Template {
     id: number;
     id_casal: number;
+    slug?: string;
     foto_casal_vertical: string;
     foto_casal_horizontal: string;
     texto_casal: string;
@@ -69,10 +70,17 @@ export interface Template {
 export const authAPI = {
     login: async (email: string, senha: string) => {
         const response = await api.post('/usuario/auth/login', { email, senha });
+        const token = response.data.token;
+        if (token) {
+            localStorage.setItem('token', token);
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
         return response.data;
     },
     logout: async () => {
         await api.post('/usuario/auth/logout');
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
     },
     me: async () => {
         const response = await api.get('/usuario/auth/me');

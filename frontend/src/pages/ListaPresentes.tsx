@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { presenteAPI, Presente, casalAPI, Casal, transacaoPresenteAPI } from '../lib/services';
+import { presenteAPI, Presente, casalAPI, Casal, transacaoPresenteAPI, templateAPI } from '../lib/services';
 import { AlertCircle, Loader, ChevronLeft, Heart, ShoppingCart, Search, Copy, CheckCircle2, Gift, Link, ExternalLink } from 'lucide-react';
 
 export const ListaPresentes: React.FC = () => {

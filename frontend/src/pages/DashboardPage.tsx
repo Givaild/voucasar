@@ -98,14 +98,31 @@ export const DashboardPage: React.FC = () => {
             return;
         }
         try {
-            await casalAPI.criar({
+            const casal = await casalAPI.criar({
                 id_usuario_1: usuario?.id || 0,
                 id_usuario_2: 0,
                 email_usuario_2: formData.emailNoivo,
                 data_casamento: formData.dataCasamento,
                 chave_pix: formData.chavePix,
             } as Casal);
-            
+
+            // Auto-create template after creating casal
+            if (casal.id) {
+                try {
+                    await templateAPI.criar(casal.id, {
+                        id_casal: casal.id,
+                        nomes_noivos: formData.emailNoivo.split('@')[0],
+                        foto_casal_vertical: '',
+                        foto_casal_horizontal: '',
+                        texto_casal: '',
+                        local_cerimonia: '',
+                        local_recepcao: '',
+                    });
+                } catch (templateErr) {
+                    console.log('Template creation optional:', templateErr);
+                }
+            }
+
             setFormData({
                 emailNoivo: '',
                 dataCasamento: '',

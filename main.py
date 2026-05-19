@@ -79,7 +79,7 @@ async def security_headers_middleware(request: Request, call_next):
     # Proteção CSRF
     if request.method in ["POST", "PUT", "DELETE", "PATCH"]:
         # Check if path should be excluded from CSRF protection
-        excluded_paths = ["/usuario", "/usuario/auth/login", "/usuario/auth/logout", "/casal", "/presente", "/template", "/transacao-presente"]
+        excluded_paths = ["/api/usuario", "/api/casal", "/api/presente", "/api/template", "/api/transacao-presente"]
         is_excluded = any(request.url.path.startswith(path) for path in excluded_paths)
         
         if not is_excluded:
