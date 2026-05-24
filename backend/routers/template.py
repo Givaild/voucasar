@@ -7,6 +7,7 @@ import re
 import secrets
 import string
 from util.auth_decorator import requer_autenticacao
+from util.rate_limit import enforce_rate_limit, get_limit_from_env
 from backend.data.model.template import Template
 from backend.data.repo import template as template_repo
 
@@ -95,9 +96,15 @@ async def criar_ou_atualizar_template(casal_id: int, request: Request, usuario_l
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/publico/{casal_id}")
-async def buscar_template_publico(casal_id: int):
+async def buscar_template_publico(casal_id: int, request: Request):
     """Busca um template publicamente (sem autenticação) para exibir na página do casamento"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:template",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_READ", 60),
+            window_seconds=60
+        )
         template = template_repo.buscar_por_casal(casal_id)
         if not template or not template.is_public:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casamento não encontrado ou privado")
@@ -153,9 +160,15 @@ async def deletar_template(casal_id: int, request: Request, usuario_logado: dict
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/publico/slug/{slug}")
-async def buscar_template_por_slug(slug: str):
+async def buscar_template_por_slug(slug: str, request: Request):
     """Busca o template de um casal pelo slug único"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:template_slug",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_READ", 60),
+            window_seconds=60
+        )
         # Primeiro busca pelo campo slug exato no banco
         t = template_repo.buscar_por_slug(slug)
         if t and t.is_public:

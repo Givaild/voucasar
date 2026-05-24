@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 import logging
 from util.auth_decorator import requer_autenticacao
 from util.confirmacao import gerar_token_confirmacao, validar_token_confirmacao
+from util.rate_limit import enforce_rate_limit, get_limit_from_env
+from util.captcha import enforce_captcha_if_enabled
 from backend.data.model.transacao_presente import TransacaoPresente
 from backend.data.repo import transacao_presente as transacao_repo
 
@@ -142,6 +144,13 @@ async def listar_transacoes_por_convidado_endpoint(convidado_id: int, request: R
 async def criar_transacao_publico(request: Request, transacao_data: dict = Body(...)):
     """Cria uma transação de presente publicamente (para convidados)"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:transacao",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_WRITE", 10),
+            window_seconds=60
+        )
+        enforce_captcha_if_enabled(request, transacao_data)
         from backend.data.repo import usuario as usuario_repo
         from backend.data.repo import casal as casal_repo
         from backend.data.model.usuario import Usuario
@@ -231,6 +240,13 @@ async def criar_transacao_publico(request: Request, transacao_data: dict = Body(
 async def criar_cota_livre_publico(request: Request, data: dict = Body(...)):
     """Gera um PIX com valor customizado para Cota Livre e registra no banco"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:cota_livre",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_WRITE", 10),
+            window_seconds=60
+        )
+        enforce_captcha_if_enabled(request, data)
         from backend.data.repo import casal as casal_repo
         from backend.data.repo import usuario as usuario_repo
         from backend.data.model.usuario import Usuario
@@ -304,6 +320,13 @@ async def criar_cota_livre_publico(request: Request, data: dict = Body(...)):
 async def confirmar_pagamento_publico(transacao_id: int, request: Request, data: dict = Body(default=None)):
     """Marca que o convidado confirmou ter realizado o pagamento"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:confirmar_pagamento",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_CONFIRM", 5),
+            window_seconds=60
+        )
+        enforce_captcha_if_enabled(request, data)
         token = request.headers.get("X-Confirm-Token")
         if not token:
             token = (data or {}).get("token")

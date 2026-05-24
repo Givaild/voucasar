@@ -6,7 +6,7 @@ interface AuthContextType {
     usuario: Usuario | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (email: string, senha: string) => Promise<void>;
+    login: (email: string, senha: string, captchaToken?: string | null) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
 }
@@ -39,8 +39,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    const login = async (email: string, senha: string) => {
-        const data = await authAPI.login(email, senha);
+    const login = async (email: string, senha: string, captchaToken?: string | null) => {
+        const data = await authAPI.login(email, senha, captchaToken);
         setUsuario(data.usuario);
     };
 

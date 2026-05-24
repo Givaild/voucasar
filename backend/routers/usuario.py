@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 import logging
 from util.auth_decorator import requer_autenticacao, criar_sessao, destruir_sessao
 from util.security import criar_hash_senha, verificar_senha
+from util.rate_limit import enforce_rate_limit, get_limit_from_env
+from util.captcha import enforce_captcha_if_enabled
 from util.csrf import csrf_protection
 from backend.data.model.usuario import Usuario
 from backend.data.repo import usuario as usuario_repo
@@ -15,6 +17,13 @@ logger = logging.getLogger(__name__)
 async def criar_usuario(request: Request, usuario_data: dict = Body(...)):
     """Cria um novo usuário"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:signup",
+            limit=get_limit_from_env("RATE_LIMIT_SIGNUP", 5),
+            window_seconds=60
+        )
+        enforce_captcha_if_enabled(request, usuario_data)
         senha_hash = criar_hash_senha(usuario_data.get("senha"))
         usuario = Usuario(
             id=0,
@@ -96,6 +105,13 @@ async def atualizar_usuario_endpoint(usuario_id: int, request: Request, usuario_
 async def login(request: Request, credenciais: dict = Body(...)):
     """Faz login de um usuário"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:login",
+            limit=get_limit_from_env("RATE_LIMIT_LOGIN", 10),
+            window_seconds=60
+        )
+        enforce_captcha_if_enabled(request, credenciais)
         email = credenciais.get("email")
         senha = credenciais.get("senha")
         

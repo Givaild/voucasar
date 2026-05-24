@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 import logging
 from util.auth_decorator import requer_autenticacao
+from util.rate_limit import enforce_rate_limit, get_limit_from_env
 from backend.data.model.casal import Casal
 from backend.data.repo import casal as casal_repo
 from backend.data.repo import usuario as usuario_repo
@@ -185,9 +186,15 @@ async def aceitar_convite_endpoint(casal_id: int, request: Request, usuario_loga
 
 
 @router.get("/publico/{casal_id}")
-async def buscar_casal_publico(casal_id: int):
+async def buscar_casal_publico(casal_id: int, request: Request):
     """Busca informações básicas de um casal publicamente"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:casal",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_READ", 60),
+            window_seconds=60
+        )
         casal = casal_repo.buscar_por_id(casal_id)
         if not casal:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casal não encontrado")

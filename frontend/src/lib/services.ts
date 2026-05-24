@@ -69,8 +69,9 @@ export interface Template {
 
 // Auth APIs
 export const authAPI = {
-    login: async (email: string, senha: string) => {
-        const response = await api.post('/usuario/auth/login', { email, senha });
+    login: async (email: string, senha: string, captchaToken?: string | null) => {
+        const headers = captchaToken ? { 'X-Captcha-Token': captchaToken } : undefined;
+        const response = await api.post('/usuario/auth/login', { email, senha }, { headers });
         const token = response.data.token;
         if (token) {
             localStorage.setItem('token', token);
@@ -91,8 +92,9 @@ export const authAPI = {
 
 // Usuario APIs
 export const usuarioAPI = {
-    criar: async (nome: string, email: string, senha: string) => {
-        const response = await api.post('/usuario', { nome, email, senha });
+    criar: async (nome: string, email: string, senha: string, captchaToken?: string | null) => {
+        const headers = captchaToken ? { 'X-Captcha-Token': captchaToken } : undefined;
+        const response = await api.post('/usuario', { nome, email, senha }, { headers });
         return response.data;
     },
     atualizar: async (id: number, dados: Partial<Usuario>) => {
@@ -215,19 +217,31 @@ export const transacaoPresenteAPI = {
     deletar: async (id: number) => {
         await api.delete(`/transacao-presente/${id}`);
     },
-    criarPublico: async (dados: { nome_convidado: string; email_convidado: string; id_presente: number; id_casal: number }) => {
-        const response = await api.post('/transacao-presente/publico', dados);
+    criarPublico: async (
+        dados: { nome_convidado: string; email_convidado: string; id_presente: number; id_casal: number },
+        captchaToken?: string | null
+    ) => {
+        const headers = captchaToken ? { 'X-Captcha-Token': captchaToken } : undefined;
+        const response = await api.post('/transacao-presente/publico', dados, { headers });
         return response.data;
     },
-    criarCotaLivrePublico: async (dados: { nome_convidado: string; email_convidado: string; valor: number; id_casal: number }) => {
-        const response = await api.post('/transacao-presente/publico/cota-livre', dados);
+    criarCotaLivrePublico: async (
+        dados: { nome_convidado: string; email_convidado: string; valor: number; id_casal: number },
+        captchaToken?: string | null
+    ) => {
+        const headers = captchaToken ? { 'X-Captcha-Token': captchaToken } : undefined;
+        const response = await api.post('/transacao-presente/publico/cota-livre', dados, { headers });
         return response.data;
     },
-    confirmarPagamentoPublico: async (transacaoId: number, token: string) => {
+    confirmarPagamentoPublico: async (transacaoId: number, token: string, captchaToken?: string | null) => {
+        const headers: Record<string, string> = { 'X-Confirm-Token': token };
+        if (captchaToken) {
+            headers['X-Captcha-Token'] = captchaToken;
+        }
         const response = await api.post(
             `/transacao-presente/publico/${transacaoId}/confirmar`,
             {},
-            { headers: { 'X-Confirm-Token': token } }
+            { headers }
         );
         return response.data;
     },

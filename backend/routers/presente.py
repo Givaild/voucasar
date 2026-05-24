@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 import logging
 from util.auth_decorator import requer_autenticacao
+from util.rate_limit import enforce_rate_limit, get_limit_from_env
 from backend.data.model.presente import Presente
 from backend.data.repo import presente as presente_repo
 
@@ -9,9 +10,15 @@ router = APIRouter(prefix="/presente", tags=["presente"])
 logger = logging.getLogger(__name__)
 
 @router.get("/publico/casal/{casal_id}")
-async def listar_presentes_publico_por_casal_endpoint(casal_id: int):
+async def listar_presentes_publico_por_casal_endpoint(casal_id: int, request: Request):
     """Lista presentes de forma pública para convidados"""
     try:
+        enforce_rate_limit(
+            request,
+            key="public:presentes",
+            limit=get_limit_from_env("RATE_LIMIT_PUBLIC_READ", 60),
+            window_seconds=60
+        )
         presentes = presente_repo.listar_por_casal(casal_id)
         return JSONResponse([
             {

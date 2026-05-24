@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, AlertCircle, Check } from 'lucide-react';
 import { usuarioAPI } from '../lib/services';
+import { getCaptchaToken } from '../lib/captcha';
 import { useAuth } from '../contexts/AuthContext';
 
 export const RegisterPage: React.FC = () => {
@@ -61,8 +62,9 @@ export const RegisterPage: React.FC = () => {
         setIsLoading(true);
 
         try {
-            await usuarioAPI.criar(nome, email, senha);
-            await login(email, senha);
+            const captchaToken = getCaptchaToken();
+            await usuarioAPI.criar(nome, email, senha, captchaToken);
+            await login(email, senha, captchaToken);
             navigate('/dashboard');
         } catch (error: any) {
             setErro(error.response?.data?.detail || 'Erro ao criar conta. Tente novamente.');

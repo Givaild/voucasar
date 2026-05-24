@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { getCaptchaToken } from '../lib/captcha';
 
 export const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ export const LoginPage: React.FC = () => {
         setIsLoading(true);
 
         try {
-            await login(email, senha);
+            await login(email, senha, getCaptchaToken());
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Erro ao fazer login. Verifique suas credenciais.');

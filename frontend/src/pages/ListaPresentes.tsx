@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { presenteAPI, Presente, casalAPI, Casal, transacaoPresenteAPI, templateAPI } from '../lib/services';
+import { getCaptchaToken } from '../lib/captcha';
 import { AlertCircle, Loader, ChevronLeft, Heart, ShoppingCart, Search, Copy, CheckCircle2, Gift, Link, ExternalLink } from 'lucide-react';
 
 export const ListaPresentes: React.FC = () => {
@@ -65,12 +66,15 @@ export const ListaPresentes: React.FC = () => {
 
         try {
             setSubmitting(true);
-            const response = await transacaoPresenteAPI.criarPublico({
+            const response = await transacaoPresenteAPI.criarPublico(
+                {
                 nome_convidado: guestInfo.nome,
                 email_convidado: guestInfo.email,
                 id_presente: selectedPresente.id,
                 id_casal: casal.id,
-            });
+                },
+                getCaptchaToken()
+            );
 
             setPixInfo({
                 chave: response.chave_pix,
@@ -321,12 +325,15 @@ export const ListaPresentes: React.FC = () => {
                                         try {
                                             setSubmitting(true);
                                             setError('');
-                                            const response = await transacaoPresenteAPI.criarCotaLivrePublico({
+                                            const response = await transacaoPresenteAPI.criarCotaLivrePublico(
+                                                {
                                                 nome_convidado: guestInfo.nome,
                                                 email_convidado: guestInfo.email,
                                                 valor: selectedPresente.valor_estimado,
                                                 id_casal: casal.id,
-                                            });
+                                                },
+                                                getCaptchaToken()
+                                            );
                                             setPixInfo({
                                                 chave: response.chave_pix,
                                                 transacaoId: response.id,
@@ -451,7 +458,8 @@ export const ListaPresentes: React.FC = () => {
                                                 }
                                                 await transacaoPresenteAPI.confirmarPagamentoPublico(
                                                     pixInfo.transacaoId,
-                                                    pixInfo.confirmacaoToken
+                                                    pixInfo.confirmacaoToken,
+                                                    getCaptchaToken()
                                                 );
                                                 setPixExpired(false);
                                                 setSelectedPresente(null);
