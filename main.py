@@ -78,10 +78,20 @@ async def request_context_middleware(request: Request, call_next):
 async def security_headers_middleware(request: Request, call_next):
     # Proteção CSRF
     if request.method in ["POST", "PUT", "DELETE", "PATCH"]:
-        # Check if path should be excluded from CSRF protection
-        excluded_paths = ["/api/usuario", "/api/casal", "/api/presente", "/api/template", "/api/transacao-presente"]
+        # Excluir apenas endpoints realmente publicos da protecao CSRF
+        excluded_paths = [
+            # Publico: cadastro e login
+            "/api/usuario",
+            "/api/usuario/auth/login",
+            # Publico: leitura
+            "/api/presente/publico",
+            "/api/casal/publico",
+            "/api/template/publico",
+            # Publico: fluxo de PIX
+            "/api/transacao-presente/publico",
+        ]
         is_excluded = any(request.url.path.startswith(path) for path in excluded_paths)
-        
+
         if not is_excluded:
             token_recebido = csrf_protection.get_token_from_request(request)
             if not csrf_protection.validate_token(request, token_recebido):
