@@ -1,237 +1,218 @@
 # 💍 VouCasar - Lista de Casamento
 
-Um sistema completo para gerenciamento de lista de casamento com frontend React e backend FastAPI.
+Plataforma completa para gerenciar listas de casamento: cadastro de casais, presentes, contribuições via PIX e páginas públicas do casamento. Frontend em React/Vite e backend em FastAPI com MySQL.
 
-## 📋 Estrutura do Projeto
+## ✨ Destaques
+
+- Autenticação por sessão com cookies e proteção CSRF
+- Lista de presentes com fluxo público para convidados
+- Templates públicos do casamento com slug amigável
+- Geração de PIX e QR Code para contribuições
+- Docker Compose pronto para desenvolvimento/produção
+
+## 🧭 Visão Geral
+
+- **Frontend**: React 18 + Vite + React Router + Tailwind
+- **Backend**: FastAPI + MySQL (pool de conexões)
+- **Proxy**: Nginx em produção (frontend) com `/api` encaminhado ao backend
+
+## 📂 Estrutura do Projeto
 
 ```
 voucasar/
-├── frontend/                      # React + React Router + Tailwind
-│   ├── src/
-│   │   ├── App.tsx               # Componente principal com rotas
-│   │   ├── main.tsx              # Entry point
-│   │   ├── index.css             # Estilos globais
-│   │   ├── lib/
-│   │   │   ├── api.ts            # Configuração do Axios
-│   │   │   └── services.ts       # APIs e tipos
-│   │   ├── contexts/
-│   │   │   └── AuthContext.tsx   # Contexto de autenticação
-│   │   ├── components/
-│   │   │   ├── Header.tsx        # Cabeçalho com menu
-│   │   │   └── ProtectedRoute.tsx # Rota protegida
-│   │   └── pages/
-│   │       ├── HomePage.tsx
-│   │       ├── LoginPage.tsx
-│   │       ├── DashboardPage.tsx
-│   │       ├── PresentsPage.tsx
-│   │       └── NotFoundPage.tsx
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   ├── tailwind.config.js
-│   └── postcss.config.js
-│
 ├── backend/
 │   ├── data/
 │   │   ├── model/                # Modelos de dados
-│   │   │   ├── usuario.py
-│   │   │   ├── casal.py
-│   │   │   ├── presente.py
-│   │   │   ├── fonte_compra.py
-│   │   │   └── transacao_presente.py
 │   │   ├── repo/                 # Repositórios (CRUD)
-│   │   │   ├── usuario.py
-│   │   │   ├── casal.py
-│   │   │   ├── presente.py
-│   │   │   ├── fonte_compra.py
-│   │   │   └── transacao_presente.py
 │   │   └── sql/                  # Queries SQL
-│   │       ├── usuario_sql.py
-│   │       ├── casal_sql.py
-│   │       ├── presente_sql.py
-│   │       ├── fonte_compra_sql.py
-│   │       └── transacao_presente_sql.py
 │   └── routers/                  # Rotas FastAPI
-│       ├── usuario.py
-│       ├── casal.py
-│       ├── presente.py
-│       ├── fonte_compra.py
-│       └── transacao_presente.py
-│
-├── main.py                       # Aplicação FastAPI principal
-└── requirements.txt             # Dependências Python
+├── frontend/
+│   ├── src/
+│   │   ├── components/           # Header, ProtectedRoute
+│   │   ├── contexts/             # AuthContext
+│   │   ├── lib/                  # Axios + serviços
+│   │   └── pages/                # Páginas da aplicação
+│   ├── nginx.conf                # Proxy /api + SPA
+│   └── vite.config.ts
+├── util/                         # Autenticação, CSRF, segurança, PIX
+├── conexao_db.py                 # Pool MySQL
+├── init_db.py                    # Inicialização de tabelas
+├── main.py                       # FastAPI
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+└── .env.example
 ```
 
-## 🚀 Como Executar
+## ✅ Requisitos
+
+- **Python 3.9+** (recomendado 3.12)
+- **Node.js 18+**
+- **MySQL 8+** (ou Docker)
+- **Docker + Docker Compose** (opcional)
+
+## 🔧 Configuração
+
+Crie o arquivo `.env` a partir do exemplo:
+
+```bash
+cp .env.example .env
+```
+
+Exemplo de `.env`:
+
+```env
+DB_USER=root
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=voucasar
+
+ENVIRONMENT=development
+SECRET_KEY=voucasar-super-secret-key-change-in-production
+FRONTEND_URL=http://localhost:5173
+PORT=8000
+
+LOG_LEVEL=INFO
+```
+
+## 🚀 Executar Localmente
 
 ### Backend (FastAPI)
 
 ```bash
-# 1. Instalar dependências
 pip install -r requirements.txt
-
-# 2. Configurar variáveis de ambiente
-cp .env.example .env  # Edite com suas configurações
-
-# 3. Executar servidor
 python main.py
-# O servidor estará em http://localhost:8000
 ```
 
-### Frontend (React)
+O backend sobe em `http://localhost:8000` com docs em:
+- `http://localhost:8000/docs`
+- `http://localhost:8000/redoc`
+
+### Frontend (React + Vite)
 
 ```bash
-# 1. Entrar no diretório do frontend
 cd frontend
-
-# 2. Instalar dependências
 npm install
-
-# 3. Executar servidor de desenvolvimento
 npm run dev
-# O frontend estará em http://localhost:5173
 ```
 
-## 📱 Funcionalidades
+Frontend em `http://localhost:5173`.
 
-### Dashboard
-- 💾 Visualizar todos os casais cadastrados
-- ➕ Criar novos casais
-- 📅 Ver data do casamento
-- 💳 Gerenciar chave PIX
+## 🐳 Executar com Docker Compose
 
-### Presentes
-- 🎁 Listar presentes por casal
-- ✏️ Adicionar novos presentes
-- 📊 Definir categoria e valor estimado
-- 🏷️ Gerenciar status (disponível, reservado, comprado)
-- 🔗 Adicionar fontes de compra (URLs)
+```bash
+docker compose up --build
+```
 
-### Autenticação
-- 🔐 Login com email e senha
-- 🔑 Sessão com autenticação via JWT
-- 🚪 Logout
-- 🛡️ Proteção de rotas
+Serviços:
+- **MySQL** em `localhost:3306`
+- **Backend** em `http://localhost:8000`
+- **Frontend (Nginx)** em `http://localhost:5173`
 
-## 🔗 Rotas da API
+## 📜 Scripts (raiz)
 
-### Usuários
-- `POST /usuario` - Criar usuário
-- `GET /usuario/{id}` - Buscar usuário por ID
-- `PUT /usuario/{id}` - Atualizar usuário
-- `GET /usuario` - Listar todos os usuários
+```bash
+npm install
+npm run dev             # backend + frontend (concurrently)
+npm run backend:run
+npm run frontend:dev
+npm run build
+```
 
-### Casais
-- `POST /casal` - Criar casal
-- `GET /casal/{id}` - Buscar casal por ID
-- `PUT /casal/{id}` - Atualizar casal
-- `DELETE /casal/{id}` - Deletar casal
-- `GET /casal` - Listar todos os casais
+## 🧩 Páginas do Frontend
 
-### Presentes
-- `POST /presente` - Criar presente
-- `GET /presente/{id}` - Buscar presente por ID
-- `PUT /presente/{id}` - Atualizar presente
-- `DELETE /presente/{id}` - Deletar presente
-- `GET /presente/casal/{casal_id}` - Listar presentes por casal
+- Casamento público: `CasamentoPage` e `MaisDetalhesPage`
+- Presentes: `ListaPresentes`, `PresentsPage`
+- Confirmação de presença: `ConfirmarPresencaPage`
+- Contribuições: `ContribuicoesPage`
+- Área privada: `DashboardPage`, `TemplateEditPage`
+- Auth: `LoginPage`, `RegisterPage`
+- Erros: `NotFoundPage`
 
-### Fontes de Compra
-- `POST /fonte-compra` - Criar fonte
-- `GET /fonte-compra/{id}` - Buscar fonte por ID
-- `PUT /fonte-compra/{id}` - Atualizar fonte
-- `DELETE /fonte-compra/{id}` - Deletar fonte
-- `GET /fonte-compra/presente/{presente_id}` - Listar fontes por presente
+## 🔐 Autenticação e Segurança
 
-### Transações de Presente
-- `POST /transacao-presente` - Criar transação
-- `GET /transacao-presente/{id}` - Buscar transação por ID
-- `PUT /transacao-presente/{id}` - Atualizar transação
-- `DELETE /transacao-presente/{id}` - Deletar transação
-- `GET /transacao-presente/casal/{casal_id}` - Listar por casal
-- `GET /transacao-presente/convidado/{convidado_id}` - Listar por convidado
+- **Sessão com cookie**: `voucasar_session`
+- **CSRF**: cookie `csrf_token` + header `X-CSRF-Token` (Axios já configurado)
+- **Tempo de sessão**: 30 minutos de inatividade
+- Em produção, configure `SECRET_KEY` e use HTTPS
+
+## 🔗 API (prefixo `/api`)
+
+### Usuário
+- `POST /api/usuario` - Criar usuário
+- `GET /api/usuario/{id}` - Buscar usuário (somente o próprio)
+- `PUT /api/usuario/{id}` - Atualizar usuário (somente o próprio)
+- `POST /api/usuario/auth/login` - Login
+- `POST /api/usuario/auth/logout` - Logout
+- `GET /api/usuario/auth/me` - Dados da sessão
+
+### Casal
+- `POST /api/casal` - Criar casal
+- `GET /api/casal` - Listar casais do usuário
+- `GET /api/casal/{id}` - Buscar casal
+- `PUT /api/casal/{id}` - Atualizar casal
+- `DELETE /api/casal/{id}` - Deletar casal
+- `DELETE /api/casal/{id}/parceiro` - Desvincular parceiro
+- `POST /api/casal/{id}/aceitar-convite` - Aceitar convite
+- `GET /api/casal/publico/{id}` - Dados públicos do casal
+- `GET /api/casal/convites/pendentes` - Convites pendentes
+
+### Presente
+- `POST /api/presente` - Criar presente
+- `GET /api/presente/{id}` - Buscar presente
+- `PUT /api/presente/{id}` - Atualizar presente
+- `DELETE /api/presente/{id}` - Deletar presente
+- `GET /api/presente/casal/{casal_id}` - Listar presentes do casal
+- `GET /api/presente/publico/casal/{casal_id}` - Lista pública
+
+### Fonte de Compra
+- `POST /api/fonte-compra` - Criar fonte
+- `GET /api/fonte-compra/{id}` - Buscar fonte
+- `PUT /api/fonte-compra/{id}` - Atualizar fonte
+- `DELETE /api/fonte-compra/{id}` - Deletar fonte
+- `GET /api/fonte-compra/presente/{presente_id}` - Listar por presente
+
+### Transação de Presente
+- `POST /api/transacao-presente` - Criar transação
+- `GET /api/transacao-presente/{id}` - Buscar transação
+- `PUT /api/transacao-presente/{id}` - Atualizar transação
+- `DELETE /api/transacao-presente/{id}` - Deletar transação
+- `GET /api/transacao-presente/casal/{casal_id}` - Listar por casal
+- `GET /api/transacao-presente/convidado/{convidado_id}` - Listar por convidado
+- `POST /api/transacao-presente/publico` - Criar transação pública (PIX)
+- `POST /api/transacao-presente/publico/cota-livre` - PIX com valor customizado
+- `POST /api/transacao-presente/publico/{transacao_id}/confirmar` - Confirmar pagamento
+
+### Template
+- `POST /api/template/{casal_id}` - Criar/atualizar template
+- `GET /api/template/{casal_id}` - Buscar template (privado)
+- `DELETE /api/template/{casal_id}` - Deletar template
+- `GET /api/template/publico/{casal_id}` - Template público
+- `GET /api/template/publico/slug/{slug}` - Template por slug
 
 ## 🛠️ Tecnologias
 
 ### Frontend
-- **React 18** - Framework UI
-- **React Router 6** - Roteamento
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Estilização
-- **Axios** - Cliente HTTP
-- **Lucide React** - Ícones
+- React 18, React Router 6, TypeScript
+- Vite, Tailwind CSS
+- Axios, Lucide React
 
 ### Backend
-- **FastAPI** - Framework web
-- **Python 3.9+** - Linguagem
-- **MySQL/MariaDB** - Banco de dados
-- **Pydantic** - Validação de dados
-- **SQLAlchemy** (opcional) - ORM
-
-## 📦 Dependências Python (requirements.txt)
-
-```
-fastapi==0.104.1
-uvicorn==0.24.0
-starlette==0.27.0
-python-dotenv==1.0.0
-mysql-connector-python==8.2.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
-```
-
-## 🔐 Variáveis de Ambiente (.env)
-
-```env
-# Ambiente
-ENVIRONMENT=development
-FRONTEND_URL=http://localhost:5173
-
-# Banco de Dados
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=sua_senha
-DB_NAME=voucasar
-
-# Segurança
-SECRET_KEY=sua-chave-secreta-aqui
-
-# Servidor
-PORT=8000
-```
-
-## 🎨 Fluxo de Uso
-
-1. **Login**: Usuário acessa a tela de login
-2. **Dashboard**: Visualiza todos os casais
-3. **Seleciona um Casal**: Clica em um casal para ver presentes
-4. **Gerencia Presentes**: Adiciona, edita ou remove presentes
-5. **Adiciona Fontes**: Para cada presente, pode adicionar links de compra
-6. **Acompanha Transações**: Vê quem vai comprar cada presente
-
-## 📝 Notas Importantes
-
-- Todas as rotas da API (exceto `/login`) requerem autenticação
-- O frontend se conecta ao backend via CORS
-- As sessões expiram após 30 minutos de inatividade
-- Senhas devem ser hasheadas antes de serem armazenadas
-- Use HTTPS em produção
+- FastAPI, Uvicorn
+- MySQL (mysql-connector)
+- Pydantic, python-dotenv
 
 ## 🤝 Contribuindo
 
-Para contribuir com melhorias:
-
-1. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-2. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-3. Push para a branch (`git push origin feature/AmazingFeature`)
+1. Crie uma branch (`git checkout -b feature/minha-feature`)
+2. Commit (`git commit -m "Minha feature"`)
+3. Push (`git push origin feature/minha-feature`)
 4. Abra um Pull Request
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a licença MIT.
-
-## 👥 Suporte
-
-Para suporte, envie um email para suporte@voucasar.com ou abra uma issue no repositório.
+MIT.
 
 ---
 
