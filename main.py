@@ -97,15 +97,23 @@ async def security_headers_middleware(request: Request, call_next):
             if not csrf_protection.validate_token(request, token_recebido):
                 return JSONResponse(status_code=403, content={"detail": "Token CSRF inválido ou ausente"})
 
+    # Garantir que o token exista na sessão ANTES do call_next —
+    # o SessionMiddleware serializa a sessão durante call_next,
+    # então qualquer escrita depois chega tarde demais.
+    csrf_protection.get_or_create_token(request)
+
     response = await call_next(request)
-    
-    # Garantir que o token seja criado e enviado pro frontend
-    token = csrf_protection.get_or_create_token(request)
+
+    # Ler o token já persistido na sessão e enviar como header e cookie
+    # O cookie não é acessível ao JS em contexto cross-origin (localhost:5173 → :8000),
+    # então o header é o canal confiável para o frontend ler e reenviar nos POSTs.
+    token = csrf_protection.get_token_from_session(request)
     if token:
+        response.headers["X-CSRF-Token"] = token
         response.set_cookie(
             key="csrf_token",
             value=token,
-            httponly=False,  # O frontend precisa ler pro Axios pegar
+            httponly=False,
             samesite="lax",
             secure=IS_PRODUCTION
         )
@@ -163,6 +171,7 @@ app.add_middleware(
         "X-Requested-With",
         "Accept",
     ],
+    expose_headers=["X-CSRF-Token"],
 )
 
 # Importando routers de VouCasar
