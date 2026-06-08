@@ -322,6 +322,11 @@ export const ListaPresentes: React.FC = () => {
                                     <form onSubmit={async (e) => {
                                         e.preventDefault();
                                         if (!casal) return;
+                                        const valorEnvio = selectedPresente.valor_estimado;
+                                        if (!valorEnvio || valorEnvio <= 0) {
+                                            setError('Informe um valor maior que zero.');
+                                            return;
+                                        }
                                         try {
                                             setSubmitting(true);
                                             setError('');
@@ -329,7 +334,7 @@ export const ListaPresentes: React.FC = () => {
                                                 {
                                                 nome_convidado: guestInfo.nome,
                                                 email_convidado: guestInfo.email,
-                                                valor: selectedPresente.valor_estimado,
+                                                valor: valorEnvio,
                                                 id_casal: casal.id,
                                                 },
                                                 getCaptchaToken()
@@ -342,8 +347,9 @@ export const ListaPresentes: React.FC = () => {
                                                 qrCodeBase64: response.qr_code_base64,
                                             });
                                             setPixExpired(false);
-                                        } catch (err) {
-                                            setError('Erro ao gerar cota livre PIX. Tente novamente.');
+                                        } catch (err: any) {
+                                            const msg = err?.response?.data?.detail || err?.message || 'Erro ao gerar PIX de valor livre. Tente novamente.';
+                                            setError(msg);
                                         } finally {
                                             setSubmitting(false);
                                         }
@@ -703,7 +709,7 @@ export const ListaPresentes: React.FC = () => {
                                         onClick={async () => {
                                             if (pixInfo?.transacaoId) {
                                                 try {
-                                                    await transacaoPresenteAPI.confirmarPagamentoPublico(pixInfo.transacaoId);
+                                                    await transacaoPresenteAPI.confirmarPagamentoPublico(pixInfo.transacaoId, pixInfo.confirmacaoToken, getCaptchaToken());
                                                     alert("Muito obrigado! Nós avisaremos os noivos sobre o seu presente.");
                                                 } catch (e) {
                                                     // Handle/ignore silently if they click multiple times
