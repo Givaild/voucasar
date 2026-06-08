@@ -4,6 +4,12 @@ Script para adicionar coluna tipo_chave_pix à tabela Casal
 Executa: ALTER TABLE Casal ADD COLUMN tipo_chave_pix VARCHAR(50) DEFAULT 'aleatoria';
 """
 
+import sys
+import os
+
+# Adicionar raiz do projeto ao path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from util.database import get_connection
 
 def adicionar_coluna_tipo_chave_pix():
