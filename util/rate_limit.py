@@ -34,11 +34,13 @@ def _get_client_ip(request: Request) -> str:
     return direct_ip or "unknown"
 
 
-def enforce_rate_limit(request: Request, key: str, limit: int, window_seconds: int) -> None:
+def _consume(bucket_key: str, limit: int, window_seconds: int) -> tuple[bool, int]:
+    """
+    Tenta consumir 1 slot do bucket. Retorna (permitido, retry_after).
+    Se permitido for False, retry_after indica em quantos segundos o cliente
+    pode tentar de novo (1 segundo, no mínimo).
+    """
     now = time.time()
-    client_ip = _get_client_ip(request)
-    bucket_key = f"{key}:{client_ip}"
-
     with _LOCK:
         bucket = _LIMITERS.get(bucket_key)
         if bucket is None:
@@ -50,13 +52,38 @@ def enforce_rate_limit(request: Request, key: str, limit: int, window_seconds: i
             bucket.popleft()
 
         if len(bucket) >= limit:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Muitas requisicoes. Tente novamente em alguns instantes.",
-                headers={"Retry-After": str(window_seconds)},
-            )
+            # Retry-After: tempo até o item mais antigo sair da janela
+            retry_after = max(1, int(bucket[0] + window_seconds - now) + 1)
+            return False, retry_after
 
         bucket.append(now)
+        return True, 0
+
+
+def enforce_rate_limit(request: Request, key: str, limit: int, window_seconds: int) -> None:
+    """
+    Aplica rate limiting por IP usando uma chave customizável.
+    Lança HTTPException 429 quando o limite é atingido.
+    """
+    client_ip = _get_client_ip(request)
+    bucket_key = f"{key}:{client_ip}"
+    allowed, retry_after = _consume(bucket_key, limit, window_seconds)
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Muitas requisicoes. Tente novamente em alguns instantes.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
+
+def check_rate_limit(request: Request, key: str, limit: int, window_seconds: int) -> tuple[bool, int]:
+    """
+    Mesma lógica de enforce_rate_limit, mas retorna (permitido, retry_after)
+    em vez de lançar exceção. Útil para middlewares.
+    """
+    client_ip = _get_client_ip(request)
+    bucket_key = f"{key}:{client_ip}"
+    return _consume(bucket_key, limit, window_seconds)
 
 
 def get_limit_from_env(name: str, default: int) -> int:
@@ -64,3 +91,15 @@ def get_limit_from_env(name: str, default: int) -> int:
         return int(os.getenv(name, str(default)))
     except ValueError:
         return default
+
+
+def get_excluded_paths_from_env(name: str) -> set[str]:
+    """
+    Lê uma variável de ambiente com paths separados por vírgula e retorna
+    um set com os paths limpos. Usado para excluir endpoints do rate limiting
+    global (ex.: /health, /docs).
+    """
+    raw = os.getenv(name, "")
+    if not raw:
+        return set()
+    return {p.strip() for p in raw.split(",") if p.strip()}
