@@ -13,6 +13,7 @@ import { ConfirmarPresencaPage } from './pages/ConfirmarPresencaPage';
 import { MaisDetalhesPage } from './pages/MaisDetalhesPage';
 import { ListaPresentes } from './pages/ListaPresentes';
 import { ContribuicoesPage } from './pages/ContribuicoesPage';
+import { LandingPage } from './pages/LandingPage';
 import './index.css';
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
                     <main className="flex-grow">
 
                         <Routes>
-                            <Route path="/" element={<Navigate to="/login" replace />} />
+                            <Route path="/" element={<LandingPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
                             <Route

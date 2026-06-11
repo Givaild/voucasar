@@ -12,8 +12,8 @@ export const Header: React.FC = () => {
     const [showConfirmLogout, setShowConfirmLogout] = useState(false);
 
     // Don't render header on login/register pages, or any public guest pages
+    // The header will now render on the landing page
     if (
-        location.pathname === '/' ||
         location.pathname === '/login' ||
         location.pathname === '/register' ||
         location.pathname.startsWith('/casamento/')
@@ -25,47 +25,98 @@ export const Header: React.FC = () => {
         setShowConfirmLogout(true);
     };
 
+    const isLandingPage = location.pathname === '/';
+
     return (
-        <header className="bg-transparent border-b border-primary-200/50 backdrop-blur-sm">
+        <header className="bg-transparent border-b border-primary-200/50 backdrop-blur-sm fixed w-full z-40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    <Link to={usuario ? "/dashboard" : "/login"} className="flex items-center">
+                    <Link to={usuario ? "/dashboard" : "/"} className="flex items-center">
                         <span className="text-3xl font-brand-logo text-primary-600">VouCasar</span>
                     </Link>
 
-                    {usuario && (
+                    {isLandingPage ? (
                         <nav className="hidden md:flex items-center gap-8">
-                            <Link to="/dashboard" className="text-gray-700 hover:text-primary-600 transition">
-                                Dashboard
-                            </Link>
-                            <Link to="/presentes" className="text-gray-700 hover:text-primary-600 transition">
-                                Presentes
-                            </Link>
+                            <a href="#inicio" className="text-primary-600 hover:text-primary-700 transition">
+                                Início
+                            </a>
+                            <a href="#sobre" className="text-primary-600 hover:text-primary-700 transition">
+                                Sobre
+                            </a>
+                            <a href="#pix-diferencial" className="text-primary-600 hover:text-primary-700 transition">
+                                Diferencial
+                            </a>
+                            <a href="#contato" className="text-primary-600 hover:text-primary-700 transition">
+                                Contato
+                            </a>
+                            <Link to="/login" className="btn btn-sm btn-ghost text-primary-600 hover:text-primary-700">Login</Link>
                         </nav>
+                    ) : (
+                        usuario && (
+                            <nav className="hidden md:flex items-center gap-8">
+                                <Link to="/dashboard" className="text-gray-700 hover:text-primary-600 transition">
+                                    Dashboard
+                                </Link>
+                                {/* Add other logged-in user navigation links here if needed */}
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center text-gray-700 hover:text-red-600 transition"
+                                >
+                                    <LogOut className="mr-1" size={18} /> Sair
+                                </button>
+                            </nav>
+                        )
                     )}
 
                     <button
-                        className="md:hidden"
+                        className="md:hidden text-gray-700"
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                     >
                         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
                 </div>
 
-                {isMenuOpen && usuario && (
-                    <div className="md:hidden pb-4 border-t">
-                        <Link to="/dashboard" className="block py-2 text-gray-700 hover:text-primary-600">
-                            Dashboard
-                        </Link>
-                        <Link to="/presentes" className="block py-2 text-gray-700 hover:text-primary-600">
-                            Presentes
-                        </Link>
-                        <button
-                            onClick={handleLogout}
-                            className="w-full text-left py-2 text-gray-700 hover:text-red-600"
-                        >
-                            Sair
-                        </button>
+                {isMenuOpen && (
+                    <div className="md:hidden pb-4 border-t border-primary-200/50 bg-white/90 backdrop-blur-md">
+                        {isLandingPage ? (
+                            <>
+                                <a href="#inicio" className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                    Início
+                                </a>
+                                <a href="#sobre" className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                    Sobre
+                                </a>
+                                <a href="#pix-diferencial" className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                    Diferencial
+                                </a>
+                                <a href="#contato" className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                    Contato
+                                </a>
+                                <Link to="/login" className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                    Login
+                                </Link>
+                            </>
+                        ) : (
+                            usuario && (
+                                <>
+                                    <Link to="/dashboard" className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                        Dashboard
+                                    </Link>
+                                    <Link to={`/casais/${usuario.casalId}/presentes`} className="block py-2 px-4 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>
+                                        Presentes
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left py-2 px-4 text-gray-700 hover:text-red-600"
+                                    >
+                                        Sair
+                                    </button>
+                                </>
+                            )
+                        )}
                     </div>
                 )}
             </div>
