@@ -38,7 +38,7 @@ export const LandingPage: React.FC = () => {
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
                     <div className="md:w-1/2">
                         <img
-                            src="/public/casal.jpeg"
+                            src="/casal.jpeg"
                             className="rounded-xl shadow-2xl object-cover w-full h-96 transform hover:scale-105 transition-transform duration-300 brightness-75"
                         />
                     </div>
@@ -94,7 +94,7 @@ export const LandingPage: React.FC = () => {
                         <div className="flex flex-col md:flex-row items-center gap-10 bg-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100">
                             <div className="flex-shrink-0">
                                 <img
-                                    src="/public/dev.jpeg" // Placeholder
+                                    src="/dev.jpeg" // Placeholder
                                     alt="Desenvolvedor"
                                     className="w-40 h-40 rounded-full object-cover shadow-md border-4 border-white"
                                 />
@@ -126,7 +126,7 @@ export const LandingPage: React.FC = () => {
                             <div className="bg-white p-6 rounded-xl shadow-md inline-block">
                                 <div className="w-40 h-40 bg-gray-200 flex items-center justify-center text-gray-500 mb-4 rounded-lg">
                                     <img
-                                    src="/public/qrcode.png" // Placeholder
+                                    src="/qrcode.png" // Placeholder
                                     alt="Desenvolvedor"
                                     />
                                 </div>
