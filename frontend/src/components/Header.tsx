@@ -37,16 +37,16 @@ export const Header: React.FC = () => {
 
                     {isLandingPage ? (
                         <nav className="hidden md:flex items-center gap-8">
-                            <a href="#inicio" className="text-primary-600 hover:text-primary-700 transition">
+                            <a href="#inicio" className="text-primary-50 hover:text-primary-700 transition">
                                 Início
                             </a>
-                            <a href="#sobre" className="text-primary-600 hover:text-primary-700 transition">
+                            <a href="#sobre" className="text-primary-50 hover:text-primary-700 transition">
                                 Sobre
                             </a>
-                            <a href="#pix-diferencial" className="text-primary-600 hover:text-primary-700 transition">
+                            <a href="#pix-diferencial" className="text-primary-50 hover:text-primary-700 transition">
                                 Diferencial
                             </a>
-                            <a href="#contato" className="text-primary-600 hover:text-primary-700 transition">
+                            <a href="#contato" className="text-primary-50 hover:text-primary-700 transition">
                                 Contato
                             </a>
                             <Link to="/login" className="btn btn-sm btn-ghost text-primary-600 hover:text-primary-700">Login</Link>
